@@ -1,12 +1,11 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include <legged_control_cpp/sample_library.hpp>
+#include "legged_control_cpp/spatial.hpp"
 
-TEST_CASE("Factorials are computed with constexpr", "[factorial]")
+TEST_CASE("Spatial rotation", "[rotation]")
 {
-  STATIC_REQUIRE(factorial_constexpr(0) == 1);
-  STATIC_REQUIRE(factorial_constexpr(1) == 1);
-  STATIC_REQUIRE(factorial_constexpr(2) == 2);
-  STATIC_REQUIRE(factorial_constexpr(3) == 6);
-  STATIC_REQUIRE(factorial_constexpr(10) == 3628800);
+  using namespace legged_ctrl;
+
+  // how to test that type is not deduced if a non-SO3 type passed?
+  STATIC_REQUIRE(std::is_same_v<decltype(spatial_rotation(SO3())), SpatialMatrix>);
 }

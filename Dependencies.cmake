@@ -9,11 +9,11 @@ function(legged_control_cpp_setup_dependencies)
   # already been provided to us by a parent project
 
   if(NOT TARGET fmtlib::fmtlib)
-    cpmaddpackage("gh:fmtlib/fmt#9.1.0")
+    CPMAddPackage("gh:fmtlib/fmt#9.1.0")
   endif()
 
   if(NOT TARGET spdlog::spdlog)
-    cpmaddpackage(
+    CPMAddPackage(
       NAME
       spdlog
       VERSION
@@ -25,19 +25,29 @@ function(legged_control_cpp_setup_dependencies)
   endif()
 
   if(NOT TARGET Catch2::Catch2WithMain)
-    cpmaddpackage("gh:catchorg/Catch2@3.3.2")
+    CPMAddPackage("gh:catchorg/Catch2@3.3.2")
   endif()
 
   if(NOT TARGET CLI11::CLI11)
-    cpmaddpackage("gh:CLIUtils/CLI11@2.3.2")
-  endif()
-
-  if(NOT TARGET ftxui::screen)
-    cpmaddpackage("gh:ArthurSonzogni/FTXUI#e23dbc7473654024852ede60e2121276c5aab660")
+    CPMAddPackage("gh:CLIUtils/CLI11@2.3.2")
   endif()
 
   if(NOT TARGET tools::tools)
-    cpmaddpackage("gh:lefticus/tools#update_build_system")
+    CPMAddPackage("gh:lefticus/tools#update_build_system")
   endif()
 
+  if(NOT TARGET Eigen3::Eigen)
+    CPMAddPackage(
+            NAME Eigen
+            VERSION 3.4.0
+            URL https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+            # Eigen's CMakelists are not intended for library use
+            DOWNLOAD_ONLY YES
+    )
+
+    if(Eigen_ADDED)
+      add_library(Eigen3::Eigen INTERFACE IMPORTED)
+      target_include_directories(Eigen3::Eigen INTERFACE ${Eigen_SOURCE_DIR})
+    endif()
+  endif()
 endfunction()

@@ -73,12 +73,6 @@ if(BUILD_TESTING)
   add_subdirectory(test)
 endif()
 
-
-if(legged_control_cpp_BUILD_FUZZ_TESTS)
-  message(AUTHOR_WARNING "Building Fuzz Tests, using fuzzing sanitizer https://www.llvm.org/docs/LibFuzzer.html")
-  add_subdirectory(fuzz_test)
-endif()
-
 # If MSVC is being used, and ASAN is enabled, we need to set the debugger environment
 # so that it behaves well with MSVC's debugger, and we can run the target from visual studio
 if(MSVC)
@@ -87,8 +81,6 @@ if(MSVC)
   set_target_properties(${all_targets} PROPERTIES VS_DEBUGGER_ENVIRONMENT "PATH=$(VC_ExecutablePath_x64);%PATH%")
 endif()
 
-# set the startup project for the "play" button in MSVC
-set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT intro)
 
 if(CMAKE_SKIP_INSTALL_RULES)
   return()
@@ -100,7 +92,6 @@ include(cmake/PackageProject.cmake)
 # we know we want to ship
 legged_control_cpp_package_project(
   TARGETS
-  intro
   legged_control_cpp_options
   legged_control_cpp_warnings
   # FIXME: this does not work! CK

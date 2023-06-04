@@ -26,6 +26,7 @@ macro(legged_control_cpp_enable_cppcheck WARNINGS_AS_ERRORS CPPCHECK_OPTIONS)
           # ignores code that cppcheck thinks is invalid C++
           --suppress=syntaxError
           --suppress=preprocessorErrorDirective
+          --suppress=constStatement:*
           --inconclusive)
     else()
       # if the user provides a CPPCHECK_OPTIONS with a template specified, it will override this template
