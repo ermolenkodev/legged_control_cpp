@@ -76,6 +76,10 @@ jobs:
         gcovr: false
         opencppcoverage: false
 
+    - name: Install urdfdom
+      run: |
+        sudo apt-get update && sudo apt-get install -y liburdfdom-dev
+
       # make sure coverage is only enabled for Debug builds, since it sets -O0 to make sure coverage
       # has meaningful results
     - name: Configure CMake
