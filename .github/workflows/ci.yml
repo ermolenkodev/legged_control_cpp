@@ -152,6 +152,34 @@ jobs:
           gcovr: true
           opencppcoverage: true
 
+      - name: Install urdfdom
+        run: |
+          if [ "${{ runner.os }}" == "Linux" ]; then
+            sudo apt-get update && sudo apt-get install -y liburdfdom-dev
+          elif [ "${{ runner.os }}" == "macOS" ]; then
+            brew install urdfdom
+          elif [ "${{ runner.os }}" == "Windows" ]; then
+            git clone https://github.com/ros/urdfdom.git
+            cd urdfdom
+            mkdir build
+            cd build
+            cmake ..
+            make
+            make install
+          fi
+
+      - name: Install urdfdom windows
+        run: |
+         if [ "${{ runner.os }}" == "Windows" ]; then
+            git clone https://github.com/ros/urdfdom.git
+            cd urdfdom
+            mkdir build
+            cd build
+            cmake ..
+            make
+            make install
+          fi
+
       - name: Configure CMake
         run: |
           cmake -S . -B ./build -G "${{matrix.generator}}" -Dlegged_control_cpp_ENABLE_IPO=${{matrix.enable_ipo }} -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}} -Dlegged_control_cpp_PACKAGING_MAINTAINER_MODE:BOOL=${{matrix.package_maintainer_mode}} -Dlegged_control_cpp_ENABLE_COVERAGE:BOOL=${{ matrix.build_type == 'Debug' }} -DGIT_SHA:STRING=${{ github.sha }}

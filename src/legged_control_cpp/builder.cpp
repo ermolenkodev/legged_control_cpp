@@ -116,7 +116,7 @@ MultibodyModelBuilder &MultibodyModelBuilder::add_link(::urdf::LinkConstSharedPt
   std::cout << rotI_C_C << "\n";
 
   // why could not infer type argument without it
-  RotationalInertia rotI_C_i = R_i_C * rotI_C_C * R_i_C.transpose();
+  RotationalInertia const rotI_C_i = R_i_C * rotI_C_C * R_i_C.transpose();
   std::cout << "Rotation inertia in link frame"
             << "\n";
   std::cout << rotI_C_i << "\n";
