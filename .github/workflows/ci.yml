@@ -153,32 +153,26 @@ jobs:
           opencppcoverage: true
 
       - name: Install urdfdom
+        if: runner.os != 'Windows'
         run: |
           if [ "${{ runner.os }}" == "Linux" ]; then
             sudo apt-get update && sudo apt-get install -y liburdfdom-dev
           elif [ "${{ runner.os }}" == "macOS" ]; then
             brew install urdfdom
-          elif [ "${{ runner.os }}" == "Windows" ]; then
-            git clone https://github.com/ros/urdfdom.git
-            cd urdfdom
-            mkdir build
-            cd build
-            cmake ..
-            make
-            make install
           fi
 
       - name: Install urdfdom windows
+        if: runner.os == 'Windows'
         run: |
-         if [ "${{ runner.os }}" == "Windows" ]; then
-            git clone https://github.com/ros/urdfdom.git
-            cd urdfdom
-            mkdir build
-            cd build
-            cmake ..
-            make
-            make install
-          fi
+          choco install make
+          git clone https://github.com/ros/urdfdom.git
+          Set-Location -Path urdfdom
+          New-Item -ItemType Directory -Force -Path build
+          Set-Location -Path build
+          cmake ..
+          make
+          make install
+
 
       - name: Configure CMake
         run: |
