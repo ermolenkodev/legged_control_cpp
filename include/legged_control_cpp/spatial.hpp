@@ -73,7 +73,8 @@ SpatialMatrix I_from_rotinertia_about_com(RotationalInertia_ &&rotI_C_C, Vector3
 
   SpatialMatrix I;
   I.setZero();
-  SkewSymmetric com_so3 = so3(p_C_i), com_so3_T = com_so3.transpose();
+  SkewSymmetric const com_so3 = so3(p_C_i);
+  SkewSymmetric const com_so3_T = com_so3.transpose();
   I.template topLeftCorner<3, 3>() = rotI_C_C + mass * com_so3 * com_so3_T;
   I.template topRightCorner<3, 3>() = mass * com_so3;
   I.template bottomLeftCorner<3, 3>() = mass * com_so3_T;

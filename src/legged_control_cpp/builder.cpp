@@ -13,8 +13,8 @@ MultibodyModelBuilderWithoutRoot::MultibodyModelBuilderWithoutRoot()
   : MultibodyModelBuilderBase{ std::make_shared<MultibodyModel>(), std::make_shared<LinkNameToIndexMap>() }
 {}
 
-MultibodyModelBuilder::MultibodyModelBuilder(ModelPtr model, LinkNameToIndexMapPtr link_name_to_idx)
-  : MultibodyModelBuilderBase(std::move(model), std::move(link_name_to_idx))
+MultibodyModelBuilder::MultibodyModelBuilder(ModelPtr model_, LinkNameToIndexMapPtr link_name_to_idx_)
+  : MultibodyModelBuilderBase(std::move(model_), std::move(link_name_to_idx_))
 {}
 
 MultibodyModelBuilder MultibodyModelBuilderWithoutRoot::set_root(const urdf::ModelInterfaceSharedPtr &urdf_tree)

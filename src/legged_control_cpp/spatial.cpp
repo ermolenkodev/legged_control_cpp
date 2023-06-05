@@ -3,8 +3,8 @@
 namespace legged_ctrl {
 // clang-format off
 SO3 Rx(double theta) {
-  double c = std::cos(theta);
-  double s = std::sin(theta);
+  double const c = std::cos(theta);
+  double const s = std::sin(theta);
 
   SO3 R;
   R << 1, 0, 0,
@@ -14,8 +14,8 @@ SO3 Rx(double theta) {
 }
 
 SO3 Ry(double theta) {
-  double c = std::cos(theta);
-  double s = std::sin(theta);
+  double const c = std::cos(theta);
+  double const s = std::sin(theta);
 
   SO3 R;
   R << c, 0, -s,
@@ -25,8 +25,8 @@ SO3 Ry(double theta) {
 }
 
 SO3 Rz(double theta) {
-  double c = std::cos(theta);
-  double s = std::sin(theta);
+  double const c = std::cos(theta);
+  double const s = std::sin(theta);
 
   SO3 R;
   R << c, s, 0,

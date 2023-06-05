@@ -39,7 +39,7 @@ public:
 class MultibodyModelBuilder : public MultibodyModelBuilderBase
 {
 public:
-  MultibodyModelBuilder(ModelPtr  model, LinkNameToIndexMapPtr link_name_to_idx);
+  MultibodyModelBuilder(ModelPtr  model_, LinkNameToIndexMapPtr link_name_to_idx_);
   MultibodyModelBuilder &add_link(::urdf::LinkConstSharedPtr const &link);
 };
 }// namespace legged_ctrl
