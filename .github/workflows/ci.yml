@@ -158,7 +158,15 @@ jobs:
           if [ "${{ runner.os }}" == "Linux" ]; then
             sudo apt-get update && sudo apt-get install -y liburdfdom-dev
           elif [ "${{ runner.os }}" == "macOS" ]; then
-            brew install urdfdom
+            brew install console_bridge
+            brew install urdfdom_headers
+            brew install tinyxml
+            git clone https://github.com/ros/urdfdom.git
+            cd urdfdom
+            mkdir build
+            cmake ..
+            make
+            sudo make install
           fi
 
       - name: Install urdfdom windows

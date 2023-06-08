@@ -15,6 +15,9 @@ public:
   SpatialMatrix joint_transform(double theta) { return this->derived()->joint_transform_impl(theta); }
 
   SpatialVector screw_axis() { return this->derived()->screw_axis_impl(); }
+private:
+  JointMetadata() = default;
+  friend Derived;
 };
 
 class RevoluteJoint : public JointMetadata<RevoluteJoint>
