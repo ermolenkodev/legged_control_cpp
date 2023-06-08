@@ -22,7 +22,7 @@ class RevoluteJoint : public JointMetadata<RevoluteJoint>
 public:
   explicit RevoluteJoint(JointAxis axis) : axis_(axis) {}
 
-  SpatialMatrix joint_transform_impl(double theta)
+  [[nodiscard]] SpatialMatrix joint_transform_impl(double theta) const
   {
     switch (axis_) {
     case JointAxis::X:
@@ -36,7 +36,7 @@ public:
     }
   }
 
-  SpatialVector screw_axis_impl()
+  [[nodiscard]] SpatialVector screw_axis_impl() const
   {
     SpatialVector result;
     result.setZero();
