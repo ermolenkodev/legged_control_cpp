@@ -1,11 +1,14 @@
 #include "legged_control_cpp/urdf.hpp"
 #include "queue"
+#include "spdlog/sinks/stdout_color_sinks.h"
 
 namespace legged_ctrl::urdf_parser {
-MultibodyModel parse_urdf(std::string const &filename)
+MultibodyModel parse_urdf(std::string const &filename, std::optional<spdlog::logger> const &logger)
 {
   ::urdf::ModelInterfaceSharedPtr const urdfTree = ::urdf::parseURDFFile(filename);
   auto builder = MultibodyModel::create().set_root(urdfTree);
+
+  if (logger) { builder.set_logger(*logger); }
 
   std::queue<::urdf::LinkConstSharedPtr> link_queue{};
 
@@ -18,6 +21,6 @@ MultibodyModel parse_urdf(std::string const &filename)
     builder.add_link(link);
   }
 
-  return builder;
+  return builder.build();
 }
 }// namespace legged_ctrl::urdf_parser

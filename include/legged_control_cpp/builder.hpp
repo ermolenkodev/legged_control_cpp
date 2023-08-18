@@ -1,29 +1,33 @@
-#ifndef MULTIBODY_MODEL_BUILDER_HPP
-#define MULTIBODY_MODEL_BUILDER_HPP
+#ifndef LCC_MULTIBODY_MODEL_BUILDER_HPP
+#define LCC_MULTIBODY_MODEL_BUILDER_HPP
 
+#include "logging.hpp"
 #include "map"
-#include "model.hpp"
 #include "memory"
+#include "model.hpp"
+#include "spdlog/logger.h"
+#include "spdlog/spdlog.h"
+#include "type_aliases.hpp"
 
 namespace legged_ctrl {
-
-using LinkNameToIndexMap = std::map<std::string, int>;
-using ModelPtr = std::shared_ptr<MultibodyModel>;
-using LinkNameToIndexMapPtr = std::shared_ptr<LinkNameToIndexMap>;
-
 class MultibodyModelBuilderBase
 {
 public:
-  // Is it good idea to move here?
-  operator MultibodyModel() const { return std::move(*model); }
+  virtual MultibodyModelBuilderBase &set_logger(spdlog::logger logger);
+  [[nodiscard]] MultibodyModel build() const { return std::move(*model_); }
+  virtual ~MultibodyModelBuilderBase() = default;
 
 protected:
-  MultibodyModelBuilderBase(ModelPtr model_, LinkNameToIndexMapPtr link_name_to_idx_);
-  // Is it possible to implement it without heap allocations?
-  //  MultibodyModel &model;
-  //  LinkNameToIndexMap &link_name_to_idx;
-  ModelPtr model;
-  LinkNameToIndexMapPtr link_name_to_idx;
+  MultibodyModelBuilderBase(ModelPtr model, LinkNameToIndexMapPtr link_name_to_idx);
+  MultibodyModelBuilderBase(ModelPtr model, LinkNameToIndexMapPtr link_name_to_idx, LoggerPtr logger);
+  MultibodyModelBuilderBase(MultibodyModelBuilderBase &&) = default;
+  MultibodyModelBuilderBase &operator=(MultibodyModelBuilderBase &&) = default;
+  MultibodyModelBuilderBase(MultibodyModelBuilderBase const &) = default;
+  MultibodyModelBuilderBase &operator=(MultibodyModelBuilderBase const &) = default;
+
+  ModelPtr model_{};
+  LinkNameToIndexMapPtr link_name_to_idx_{};
+  LoggerPtr logger_{ null_logger() };
 };
 
 class MultibodyModelBuilderWithoutRoot : public MultibodyModelBuilderBase
@@ -31,16 +35,18 @@ class MultibodyModelBuilderWithoutRoot : public MultibodyModelBuilderBase
 public:
   MultibodyModelBuilderWithoutRoot();
   MultibodyModelBuilder set_root(::urdf::ModelInterfaceSharedPtr const &urdf_tree);
-//private:
-  //  MultibodyModel result_model{};
-  //  LinkNameToIndexMap name_to_idx{};
+  MultibodyModelBuilderWithoutRoot &set_logger(spdlog::logger logger) override;
 };
 
 class MultibodyModelBuilder : public MultibodyModelBuilderBase
 {
 public:
-  MultibodyModelBuilder(ModelPtr  model_, LinkNameToIndexMapPtr link_name_to_idx_);
   MultibodyModelBuilder &add_link(::urdf::LinkConstSharedPtr const &link);
+  MultibodyModelBuilder &set_logger(spdlog::logger logger) override;
+
+private:
+  MultibodyModelBuilder(ModelPtr model, LinkNameToIndexMapPtr link_name_to_idx, LoggerPtr logger);
+  friend class MultibodyModelBuilderWithoutRoot;
 };
 }// namespace legged_ctrl
 

@@ -55,7 +55,7 @@ template<typename SE3_, typename = IsSE3<SE3_>> SpatialMatrix Ad(SE3_ &&T)
   X.template topLeftCorner<3, 3>() = R;
   X.template bottomRightCorner<3, 3>() = R;
   Vector3 p = T.template topRightCorner<3, 1>();
-  X.template bottomRightCorner<3, 3>() = so3(p) * R;
+  X.template bottomLeftCorner<3, 3>() = so3(p) * R;
 
   return X;
 }
@@ -63,12 +63,14 @@ template<typename SE3_, typename = IsSE3<SE3_>> SpatialMatrix Ad(SE3_ &&T)
 // How to deal with function of multiple arguments and SFINAE? It looks too verbose to me.
 // why type deduction did not work here?
 template<typename RotationalInertia_>
-using IsRotationalInertia = std::enable_if_t<std::is_same_v<RotationalInertia , std::decay_t<RotationalInertia_>>, RotationalInertia_>;
+using IsRotationalInertia =
+  std::enable_if_t<std::is_same_v<RotationalInertia, std::decay_t<RotationalInertia_>>, RotationalInertia_>;
 
 template<typename RotationalInertia_, typename Vector3_>
 SpatialMatrix I_from_rotinertia_about_com(RotationalInertia_ &&rotI_C_C, Vector3_ &&p_C_i, double mass)
 {
-  static_assert(std::is_same_v<RotationalInertia, std::decay_t<RotationalInertia_>>, "rotational inertia must be of type RotationalInertia");
+  static_assert(std::is_same_v<RotationalInertia, std::decay_t<RotationalInertia_>>,
+    "rotational inertia must be of type RotationalInertia");
   static_assert(std::is_same_v<Vector3, std::decay_t<Vector3_>>, "vector must be of type Vector3");
 
   SpatialMatrix I;
@@ -81,6 +83,50 @@ SpatialMatrix I_from_rotinertia_about_com(RotationalInertia_ &&rotI_C_C, Vector3
   I.template bottomRightCorner<3, 3>() = mass * Matrix3::Identity();
 
   return I;
+}
+
+template<typename Vector3_, typename = IsVector3<Vector3_>> SpatialVector spatial_gravity(Vector3_ &&gravity)
+{
+  SpatialVector g;
+  g.setZero();
+  g.template bottomRows<3>() = std::forward<Vector3_>(gravity);
+  return g;
+}
+
+template<typename SpatialVector_>
+using IsSpatialVector = std::enable_if_t<std::is_same_v<SpatialVector, std::decay_t<SpatialVector_>>, SpatialVector_>;
+
+template<typename SpatialVector_, typename = IsSpatialVector<SpatialVector_>> SpatialMatrix Vx(SpatialVector_ &&V)
+{
+  SpatialMatrix X;
+  X.setZero();
+  Vector3 const omega = V.template topRows<3>();
+  Vector3 const v = V.template bottomRows<3>();
+  SkewSymmetric const omega_so3 = so3(omega);// NOLINT
+  X.template topLeftCorner<3, 3>() = omega_so3;
+  X.template bottomLeftCorner<3, 3>() = so3(v);
+  X.template bottomRightCorner<3, 3>() = omega_so3;
+
+  return X;
+}
+
+
+template<typename SpatialVector_, typename = IsSpatialVector<SpatialVector_>> SpatialMatrix Vx_star(SpatialVector_ &&V)
+{
+  return -Vx(std::forward<SpatialVector_>(V)).transpose();
+}
+
+template<typename SE3_, typename = IsSE3<SE3_>> SE3 Tinv(SE3_ &&T)
+{
+  SE3 T_inv;
+  T_inv.setZero();
+  auto const Rt = T.template topLeftCorner<3, 3>().transpose();
+  auto const p = T.template topRightCorner<3, 1>();
+  T_inv.template topLeftCorner<3, 3>() = Rt;
+  T_inv.template topRightCorner<3, 1>() = -Rt * p;
+  T_inv(3, 3) = 1.0;
+
+  return T_inv;
 }
 }// namespace legged_ctrl
 

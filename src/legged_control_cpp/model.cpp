@@ -6,8 +6,8 @@ MultibodyModelBuilderWithoutRoot MultibodyModel::create() { return MultibodyMode
 
 std::ostream &operator<<(std::ostream &os, MultibodyModel const &model)
 {
-  os << model.name << std::endl;
-  os << "n_bodies: " << model.n_bodies << std::endl;
+  os << model.name_ << std::endl;
+  os << "n_bodies: " << model.n_bodies_ << std::endl;
   return os;
 }
 }// namespace legged_ctrl
