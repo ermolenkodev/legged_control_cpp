@@ -12,6 +12,7 @@
 #include "vector"
 
 namespace legged_ctrl {
+
 struct RNEAExtendedOutput
 {
   IndexedSpatialVectors V_;
@@ -57,6 +58,7 @@ namespace details {
     ExternalForces const &externalForces,
     Vector3 const &gravity = Vector3 { 0, 0, G });
 }
+
 }// namespace legged_ctrl
 
 #endif

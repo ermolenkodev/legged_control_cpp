@@ -7,6 +7,7 @@
 #include "variant"
 
 namespace legged_ctrl {
+
 enum class JointAxis { X, Y, Z, UNALIGNED };
 
 template<typename Derived> class JointMetadata : public Crtp<Derived>
@@ -58,6 +59,7 @@ private:
 };
 
 using JointModelVariant = std::variant<RevoluteJoint>;
+
 }// namespace legged_ctrl
 
 #endif

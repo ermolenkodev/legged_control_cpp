@@ -10,6 +10,7 @@
 #include "type_aliases.hpp"
 
 namespace legged_ctrl {
+
 class MultibodyModelBuilderBase
 {
 public:
@@ -48,6 +49,7 @@ private:
   MultibodyModelBuilder(ModelPtr model, LinkNameToIndexMapPtr link_name_to_idx, LoggerPtr logger);
   friend class MultibodyModelBuilderWithoutRoot;
 };
+
 }// namespace legged_ctrl
 
 #endif

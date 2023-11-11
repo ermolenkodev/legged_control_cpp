@@ -19,6 +19,7 @@ void apply_end_effector_exerted_force(IndexedSpatialVectors &F,
 #pragma GCC diagnostic push
 #pragma clang diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+
 void apply_external_forces(IndexedSpatialVectors &F,
   ExternalForces const &external_forces,
   MultibodyModel const &model,
@@ -40,6 +41,8 @@ void apply_external_forces(IndexedSpatialVectors &F,
     }
   }
 }
+
 #pragma clang diagnostic pop
 #pragma GCC diagnostic pop
+
 }// namespace legged_ctrl

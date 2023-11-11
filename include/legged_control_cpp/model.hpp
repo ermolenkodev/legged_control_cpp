@@ -11,8 +11,10 @@
 #include "vector"
 
 namespace legged_ctrl {
+
 class MultibodyModelBuilder;
 class MultibodyModelBuilderWithoutRoot;
+
 }// namespace legged_ctrl
 
 namespace legged_ctrl {

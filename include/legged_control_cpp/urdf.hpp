@@ -7,7 +7,9 @@
 #include "urdf_parser/urdf_parser.h"
 
 namespace legged_ctrl::urdf_parser {
+
 MultibodyModel parse_urdf(std::string const &filename, std::optional<spdlog::logger> const &logger = std::nullopt);
+
 }// namespace legged_ctrl::urdf_parser
 
 #endif

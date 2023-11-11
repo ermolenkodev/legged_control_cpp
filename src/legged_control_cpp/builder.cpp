@@ -6,6 +6,7 @@
 
 
 namespace legged_ctrl {
+
 MultibodyModelBuilderBase::MultibodyModelBuilderBase(ModelPtr model, LinkNameToIndexMapPtr link_name_to_idx)
   : model_{ std::move(model) }, link_name_to_idx_{ std::move(link_name_to_idx) }
 {}
@@ -144,4 +145,5 @@ MultibodyModelBuilder &MultibodyModelBuilder::add_link(::urdf::LinkConstSharedPt
 
   return *this;
 }
+
 }// namespace legged_ctrl

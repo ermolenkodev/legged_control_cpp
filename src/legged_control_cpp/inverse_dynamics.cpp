@@ -84,5 +84,4 @@ VectorX RNEAExtendedOutput::nle() const { return manipulator_eq_lhs_; }
 
 VectorX RNEAExtendedOutput::g() const { return manipulator_eq_lhs_; }
 
-
 }// namespace legged_ctrl

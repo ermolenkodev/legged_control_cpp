@@ -4,6 +4,7 @@
 #include "type_aliases.hpp"
 
 namespace legged_ctrl {
+
 SO3 Rx(double theta);
 
 SO3 Ry(double theta);
