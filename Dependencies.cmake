@@ -50,4 +50,11 @@ function(legged_control_cpp_setup_dependencies)
       target_include_directories(Eigen3::Eigen INTERFACE ${Eigen_SOURCE_DIR})
     endif()
   endif()
+
+  if (NOT TARGET nlohmann_json::nlohmann_json)
+    CPMAddPackage(
+            NAME nlohmann_json
+            GITHUB_REPOSITORY nlohmann/json
+            VERSION 3.9.1)
+  endif()
 endfunction()

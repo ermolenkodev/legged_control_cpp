@@ -2,7 +2,8 @@ include(GenerateExportHeader)
 
 find_package(urdfdom REQUIRED)
 
-add_library(legged_control_lib builder.cpp model.cpp urdf.cpp spatial.cpp inverse_dynamics.cpp logging.cpp external_forces.cpp)
+add_library(legged_control_lib builder.cpp model.cpp urdf.cpp spatial.cpp inverse_dynamics.cpp logging.cpp external_forces.cpp
+            forward_dynamics.cpp jacobian.cpp)
 
 add_library(legged_control_cpp::legged_control_lib ALIAS legged_control_lib)
 
