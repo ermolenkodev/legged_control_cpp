@@ -2,6 +2,7 @@
 #include "legged_control_cpp/model.hpp"
 #include "legged_control_cpp/urdf.hpp"
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include "legged_control_cpp/forward_dynamics.hpp"
 
 using namespace legged_ctrl;
 
@@ -14,12 +15,14 @@ int main(int argc, char **argv)
   logger.set_level(spdlog::level::debug);
 
   MultibodyModel const model = legged_ctrl::urdf_parser::parse_urdf(urdf_path, logger);
-  auto ph = PhysicsDescription{ model };
   auto config = SystemConfiguration{ VectorX::Zero(model.num_bodies()) };
   auto end_effector_force = SpatialVector::Ones();
   auto ext = ExternalForces{ end_effector_force };
 
-  std::cout << "Tau:\n" << legged_ctrl::rnea(ph, config, ext) << '\n';
+  std::cout << "Tau:\n" << legged_ctrl::rnea(model, config, ext) << '\n';
+
+  std::cout << legged_ctrl::crba(model, config, ext).mass_matrix_ << "\n\n";
+  std::cout << legged_ctrl::crba(model, config, ext).nle_ << '\n';
 
   return 0;
 }
