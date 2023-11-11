@@ -75,30 +75,6 @@ void simulate_joint_space_control(json const &config)
   }
 }
 
-void sample_trajectory(double const time, json const &config)
-{
-  VectorX const phi = get_vector(config, "phi");
-
-  VectorX const freq = get_vector(config, "freq");
-  VectorX const two_pi_f = 2 * M_PI * freq;
-  VectorX const amplitude = get_vector(config, "amp");
-  VectorX const two_pi_f_amp = two_pi_f.array() * amplitude.array();
-  VectorX const two_pi_f_squared_amp = two_pi_f.array() * two_pi_f_amp.array();
-  VectorX q0 = get_vector(config, "q0");
-  VectorX const q = q0;
-  VectorX const qd = get_vector(config, "qd0");
-  VectorX const qdd = get_vector(config, "qdd0");
-
-  VectorX q_des = q0.array() + amplitude.array() * Eigen::sin(two_pi_f.array() * time + phi.array());
-  VectorX qd_des = two_pi_f_amp.array() * Eigen::cos(two_pi_f.array() * time + phi.array());
-  VectorX qdd_des = two_pi_f_squared_amp.array() * -Eigen::sin(two_pi_f.array() * time + phi.array());
-
-  std::cout << "q_des: " << q_des.transpose() << '\n';
-  std::cout << "qd_des: " << qd_des.transpose() << '\n';
-  std::cout << "qdd_des: " << qdd_des.transpose() << '\n';
-  std::cout << '\n';
-}
-
 int main()
 {
   auto optional_config = read_config();
@@ -109,13 +85,6 @@ int main()
   }
 
   try {
-    sample_trajectory(0., *optional_config);
-    sample_trajectory(0.1, *optional_config);
-    sample_trajectory(0.2, *optional_config);
-    sample_trajectory(1, *optional_config);
-    sample_trajectory(2, *optional_config);
-    sample_trajectory(3.091, *optional_config);
-
     simulate_joint_space_control(*optional_config);
   } catch (...) {
     std::cerr << "Failed to simulate joint space control" << '\n';

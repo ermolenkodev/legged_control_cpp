@@ -47,12 +47,9 @@ SpatialMatrix translation_part(SpatialMatrix const &X)
 {
   SpatialMatrix X_translation = X;
   SO3 const &R = X.template topLeftCorner<3, 3>();
-  std::cout << "R = " << std::endl << R << std::endl;
   X_translation.bottomLeftCorner<3, 3>() =  X.template bottomLeftCorner<3, 3>() * R.transpose();
-  std::cout << "X_translation = " << std::endl << X_translation << std::endl;
   X_translation.topLeftCorner<3, 3>().setIdentity();
   X_translation.bottomRightCorner<3, 3>().setIdentity();
-  std::cout << "X_translation = " << std::endl << X_translation << std::endl;
 
   return X_translation;
 }
