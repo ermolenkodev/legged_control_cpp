@@ -16,6 +16,7 @@ class MultibodyModelBuilderWithoutRoot;
 }// namespace legged_ctrl
 
 namespace legged_ctrl {
+
 struct MultibodyModel
 {
 public:
@@ -25,7 +26,7 @@ public:
   std::vector<int> parent_{};
   std::vector<SpatialMatrix> X_tree_{};
   std::vector<SpatialMatrix> I_{};
-  std::optional<SE3> T_n_ee_{ std::nullopt };
+  std::optional<SE3> nTee_{ std::nullopt };
 
   static MultibodyModelBuilderWithoutRoot create();
   friend class MultibodyModelBuilderWithoutRoot;
@@ -33,7 +34,7 @@ public:
 
   friend std::ostream &operator<<(std::ostream &os, MultibodyModel const &model);
 
-  [[nodiscard]] std::optional<SE3> const &get_ee_transform() const { return T_n_ee_; }
+  [[nodiscard]] std::optional<SE3> const &get_ee_transform() const { return nTee_; }
 
   [[nodiscard]] int num_bodies() const { return n_bodies_; }
 
@@ -41,17 +42,6 @@ public:
 };
 
 const double G = -9.81;
-struct PhysicsDescription
-{
-  MultibodyModel system_model{};
-  Vector3 gravity{ 0, 0, G };
-
-  explicit PhysicsDescription(MultibodyModel system_model_) : system_model(std::move(system_model_)) {}
-
-  PhysicsDescription(MultibodyModel system_model_, Vector3 gravity_)
-    : system_model(std::move(system_model_)), gravity(std::move(gravity_))
-  {}
-};
 
 struct SystemConfiguration
 {
@@ -84,7 +74,10 @@ struct ExternalForces
   ExternalForces(IndexedSpatialVectors f_ext_, SpatialVector f_tip_)
     : f_ext(std::move(f_ext_)), f_tip(std::move(f_tip_))
   {}
+
+  static ExternalForces none() { return {}; }
 };
+
 }// namespace legged_ctrl
 
 #endif
