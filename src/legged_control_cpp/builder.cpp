@@ -98,9 +98,9 @@ MultibodyModelBuilder &MultibodyModelBuilder::add_link(::urdf::LinkConstSharedPt
   } else if (link->parent_joint->type == ::urdf::Joint::FIXED) {
     if (link->name == "ee_link") {
       logger_->debug("Found end effector link");
-      model_->T_n_ee_ = convert_from_urdf(link->parent_joint->parent_to_joint_origin_transform);
+      model_->nTee_ = convert_from_urdf(link->parent_joint->parent_to_joint_origin_transform);
       // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-      logger_->debug("End effector transform: \n{}", matrix_to_str(model_->T_n_ee_.value()));
+      logger_->debug("End effector transform: \n{}", matrix_to_str(model_->nTee_.value()));
     }
     return *this;
   } else {

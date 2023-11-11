@@ -13,6 +13,7 @@ struct MultibodyModel;
 }
 
 namespace legged_ctrl {
+
 constexpr int SIX_DIM = 6;
 using SE3 = Eigen::Matrix4d;
 using Quaternion = Eigen::Quaternion<double>;
@@ -28,6 +29,10 @@ using IndexedSpatialVectors = std::unordered_map<int, SpatialVector>;
 using LinkNameToIndexMap = std::map<std::string, int>;
 using ModelPtr = std::shared_ptr<MultibodyModel>;
 using LinkNameToIndexMapPtr = std::shared_ptr<LinkNameToIndexMap>;
+using JointSpaceMatrix = Eigen::MatrixXd;
+using JacobianMatrix = Eigen::MatrixXd;
+using IndexedSpatialMatrices = std::unordered_map<int, SpatialMatrix>;
+
 }// namespace legged_ctrl
 
 #endif

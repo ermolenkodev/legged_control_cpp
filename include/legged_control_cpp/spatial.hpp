@@ -128,6 +128,11 @@ template<typename SE3_, typename = IsSE3<SE3_>> SE3 Tinv(SE3_ &&T)
 
   return T_inv;
 }
+
+SpatialMatrix translation_part(SpatialMatrix const &X);
+
+SE3 translation_part(SE3 const &T);
+
 }// namespace legged_ctrl
 
 #endif
