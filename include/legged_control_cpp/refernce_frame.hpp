@@ -3,7 +3,7 @@
 
 namespace legged_ctrl {
 
-enum ReferenceFrame { WORLD = 0, LOCAL_WORLD_ALIGNED = 2 };
+enum ReferenceFrame : std::uint8_t { WORLD = 0, LOCAL_WORLD_ALIGNED = 2 };
 
 }
 
