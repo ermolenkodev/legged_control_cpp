@@ -27,7 +27,6 @@ JacobianMatrix compute_end_effector_frame_jacobian(MultibodyModel const &model, 
   if (reference_frame == ReferenceFrame::LOCAL_WORLD_ALIGNED) {
     auto nTee = model.get_ee_transform();
     if (!nTee.has_value()) { throw std::runtime_error("No end effector placement"); }
-    auto nTee_trans = translation_part(nTee.value());
     auto nXee = Ad(nTee.value());
     SpatialMatrix const wXee = wXi[n_bodies - 1] * nXee;
     SpatialMatrix const translation = translation_part(wXee);
