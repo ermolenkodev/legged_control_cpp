@@ -55,6 +55,8 @@ function(legged_control_cpp_setup_dependencies)
     CPMAddPackage(
             NAME nlohmann_json
             GITHUB_REPOSITORY nlohmann/json
-            VERSION 3.9.1)
+            VERSION 3.9.1
+            OPTIONS
+            "JSON_BuildTests OFF")
   endif()
 endfunction()
