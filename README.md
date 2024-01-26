@@ -49,6 +49,8 @@ To replay the trajectory, run the following command:
 ```bash
  ros2 launch rviz_trajectory_player rviz_trajectory_player.launch.py robot_file:=<absolute_path_to_urdf|xacro_file> trajectory_file:=<absolute_path_to_trajectory_file>
 ```
+#### Demonstration of Sinusoidal Trajectory Tracking with a Joint Space controller
+![Demo of joint controller sinusoidal trajectory tracking](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNW90cmM1OWJ6aGt1YzRuZGdiMDl4Nzgwd2UxcmFvbWNjZXRibWtldiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/vtr3CjGMr4ZaTHgNmm/giphy.gif)
 ## More Details
 > This project structure was derived from the [cpp_starter_project](https://github.com/cpp-best-practices/cmake_template). As a result, you may encounter instances of the template project's name in the CMake files or within the documentation.
 Please also be aware that while instructions for Windows and macOS setup are provided, they may not be fully complete or thoroughly tested. This project has been primarily tested on Ubuntu. However, it's anticipated to function on Windows and macOS systems, provided that the necessary dependencies have been properly installed.
