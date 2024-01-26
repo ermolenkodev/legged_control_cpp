@@ -29,7 +29,7 @@ macro(legged_control_cpp_setup_options)
 
   if(NOT PROJECT_IS_TOP_LEVEL OR legged_control_cpp_PACKAGING_MAINTAINER_MODE)
     option(legged_control_cpp_ENABLE_IPO "Enable IPO/LTO" OFF)
-    option(legged_control_cpp_WARNINGS_AS_ERRORS "Treat Warnings As Errors" ON)
+    option(legged_control_cpp_WARNINGS_AS_ERRORS "Treat Warnings As Errors" OFF)
     option(legged_control_cpp_ENABLE_USER_LINKER "Enable user-selected linker" OFF)
     option(legged_control_cpp_ENABLE_SANITIZER_ADDRESS "Enable address sanitizer" OFF)
     option(legged_control_cpp_ENABLE_SANITIZER_LEAK "Enable leak sanitizer" OFF)
