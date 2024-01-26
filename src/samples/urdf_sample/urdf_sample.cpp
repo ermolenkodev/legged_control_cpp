@@ -3,6 +3,7 @@
 #include "legged_control_cpp/urdf.hpp"
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include "legged_control_cpp/forward_dynamics.hpp"
+#include "iostream"
 
 using namespace legged_ctrl;
 

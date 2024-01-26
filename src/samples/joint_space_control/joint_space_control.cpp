@@ -102,7 +102,7 @@ std::vector<StateWithTimestamp> simulate_joint_space_control(json const &config,
 
     tau = kp * (q_des - q) + kd * (qd_des - qd);
 
-    auto [M, C] = crba(model, SystemConfiguration{ q, qd }, ExternalForces{ VectorX::Zero(q.size()) });
+    auto [M, C] = crba(model, { q, qd }, ExternalForces{ VectorX::Zero(q.size()) });
     auto M_inv = M.inverse();
 
     qdd = M_inv * (tau - C);
