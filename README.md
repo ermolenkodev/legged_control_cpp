@@ -61,3 +61,9 @@ Please also be aware that while instructions for Windows and macOS setup are pro
 ### Note about the License
 This project closely follows the API and notation used in spatial v2, and as a result,
 it is considered a derivative work of this library and is licensed with GPL v3.
+
+### Reference Materials
+* [Spatial v2](http://royfeatherstone.org/spatial/v2/)
+* [Control of legged robots](https://www.youtube.com/playlist?list=PLpppns-JGSyKFwngvh-DYRBpH9NUdqH4J)
+* [Modern robotics](https://github.com/NxRLab/ModernRobotics)
+* [pinocchio](https://github.com/stack-of-tasks/pinocchio)
