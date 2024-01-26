@@ -1,5 +1,4 @@
-## Dependencies
-
+## Required Toolchain
 Note about install commands:
 - for Windows, we use [choco](https://chocolatey.org/install).
 - for MacOS, we use [brew](https://brew.sh/).
@@ -190,3 +189,29 @@ The following compilers should work:
 	Follow instructions here:
 	https://github.com/include-what-you-use/include-what-you-use#how-to-install
 	</details>
+
+
+## Dependencies
+Primarily, the library dependencies for this project are handled by CPM.cmake.
+Nonetheless, there are a few dependencies that require manual installation.
+Below, you will find the instructions for manually installing these dependencies specifically for Ubuntu systems.
+```bash
+build_and_install() {
+    repo=$1
+
+    git clone "https://github.com/ros/${repo}" && \
+    cd "${repo}" && \
+    mkdir build && \
+    cd build && \
+    cmake .. && \
+    make && \
+    make install
+    cd ../..
+}
+
+build_and_install console_bridge
+build_and_install urdfdom_headers
+apt-get update && apt-get install -y --no-install-recommends libtinyxml2-dev
+build_and_install urdfdom
+```
+Currently, installation instructions for Windows and macOS are not available. We recommend using the Docker image provided. Alternatively, you could attempt to install the application using the respective package managers for these platforms, or choose to build directly from the source.

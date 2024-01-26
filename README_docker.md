@@ -42,7 +42,7 @@ docker run -it \
 	my_project:latest
 ```
 
-You can configure and build [as directed above](#build) using these commands:
+You can configure and build [as directed above] using these commands:
 
 ```bash
 /starter_project# mkdir build
