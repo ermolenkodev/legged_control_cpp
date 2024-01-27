@@ -10,14 +10,15 @@ using namespace legged_ctrl;
 
 using json = nlohmann::json;
 
+#define ENABLE_GRAVITY_COMPENSATION 0
+
 std::vector<StateWithTimestamp> simulate_joint_space_control(json const &config, spdlog::logger &logger)
 {
   VectorX const freq = get_vector(config, "freq");
   VectorX const two_pi_f = 2 * M_PI * freq;
   VectorX const amplitude = get_vector(config, "amp");
   VectorX const two_pi_f_amp = two_pi_f.array() * amplitude.array();
-  // TODO fix this
-  //  VectorX const two_pi_f_squared_amp = two_pi_f.array() * two_pi_f_amp.array();
+
   VectorX const q0 = get_vector(config, "q0");
 
   VectorX q = q0;
@@ -47,15 +48,18 @@ std::vector<StateWithTimestamp> simulate_joint_space_control(json const &config,
   while (time < simulation_time) {
     q_des = q0.array() + amplitude.array() * Eigen::sin(two_pi_f.array() * time + phi.array());
     qd_des = two_pi_f_amp.array() * Eigen::cos(two_pi_f.array() * time + phi.array());
-    //    qdd_des = two_pi_f_squared_amp.array() * -Eigen::sin(two_pi_f.array() * time + phi.array());
 
     //    auto const J6 = compute_end_effector_frame_jacobian(model, q, LOCAL_WORLD_ALIGNED);
     //    auto const J = J6.topRows(3);
 
-    tau = kp * (q_des - q) + kd * (qd_des - qd);
-
     auto [M, C] = crba(model, { q, qd }, ExternalForces{ VectorX::Zero(q.size()) });
     auto M_inv = M.inverse();
+#if ENABLE_GRAVITY_COMPENSATION
+    auto g = compute_gravity_effect(model, { q, qd }, ExternalForces::none());
+    tau = kp * (q_des - q) + kd * (qd_des - qd) + g;
+#else
+    tau = kp * (q_des - q) + kd * (qd_des - qd);
+#endif
 
     qdd = M_inv * (tau - C);
     qd = qd + qdd * dt;
