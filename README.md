@@ -19,8 +19,8 @@ The primary goal is to develop all these algorithms from scratch (possibly exclu
 - [ ] Manipulator Control
   - [ ] Joint Space Control
     - [x] Simple PD Control
-    - [ ] PD Control with Gravity Compensation
-    - [ ] Feedforward Control
+    - [x] PD Control with Gravity Compensation
+    - [x] Feedforward Control
     - [ ] Inverse Dynamics Control
   - [ ] Operational Space Control
   - [ ] Contact consistent dynamics
