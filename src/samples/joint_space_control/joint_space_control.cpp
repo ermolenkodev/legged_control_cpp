@@ -1,62 +1,14 @@
 #include "cmath"
 #include "legged_control_cpp/forward_dynamics.hpp"
-//#include "legged_control_cpp/jacobian.hpp"
+// #include "legged_control_cpp/jacobian.hpp"
+#include "config.hpp"
 #include "legged_control_cpp/type_aliases.hpp"
 #include "legged_control_cpp/urdf.hpp"
-#include "optional"
-#include <fstream>
-#include <iostream>
-#include <nlohmann/json.hpp>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <utility>
+#include "trajectory_io.hpp"
 
 using namespace legged_ctrl;
 
 using json = nlohmann::json;
-
-std::optional<json> read_config(spdlog::logger &logger) noexcept
-{
-  std::ifstream f("src/samples/joint_space_control/config.json");
-  try {
-    return json::parse(f);
-  } catch (json::parse_error const &e) {
-    logger.error("Failed to parse config file: %s", e.what());
-    return std::nullopt;
-  }
-}
-
-VectorX get_vector(json const &config, std::string const &key)
-{
-  std::vector<double> vec = config.at(key);
-  return VectorX(Eigen::VectorXd::Map(vec.data(), static_cast<long>(vec.size())));
-}
-
-Eigen::Matrix<double, SIX_DIM, SIX_DIM> get_matrix(json const &config, std::string const &key)
-{
-  std::vector<double> vec = config.at(key);
-  return Eigen::Matrix<double, SIX_DIM, SIX_DIM>(
-    Eigen::Matrix<double, SIX_DIM, SIX_DIM>::Map(vec.data(), SIX_DIM, SIX_DIM));
-}
-
-struct StateWithTimestamp
-{
-  double time_from_simulation_start_{};
-  VectorX state_{};
-
-  StateWithTimestamp(double timestamp, VectorX state) : time_from_simulation_start_(timestamp), state_(std::move(state))
-  {}
-
-  friend std::ostream &operator<<(std::ostream &os, StateWithTimestamp const &obj)
-  {
-    os << obj.time_from_simulation_start_ << ',' << obj.state_.transpose();
-    return os;
-  }
-};
-
-void write_trajectory_to_file(std::vector<StateWithTimestamp> const &trajectory, std::ofstream &file)
-{
-  for (auto const &sample : trajectory) { file << sample << '\n'; }
-}
 
 std::vector<StateWithTimestamp> simulate_joint_space_control(json const &config, spdlog::logger &logger)
 {
@@ -65,7 +17,7 @@ std::vector<StateWithTimestamp> simulate_joint_space_control(json const &config,
   VectorX const amplitude = get_vector(config, "amp");
   VectorX const two_pi_f_amp = two_pi_f.array() * amplitude.array();
   // TODO fix this
-//  VectorX const two_pi_f_squared_amp = two_pi_f.array() * two_pi_f_amp.array();
+  //  VectorX const two_pi_f_squared_amp = two_pi_f.array() * two_pi_f_amp.array();
   VectorX const q0 = get_vector(config, "q0");
 
   VectorX q = q0;
@@ -74,7 +26,7 @@ std::vector<StateWithTimestamp> simulate_joint_space_control(json const &config,
 
   VectorX q_des;
   VectorX qd_des;
-//  VectorX qdd_des = VectorX::Zero(q.size());
+  //  VectorX qdd_des = VectorX::Zero(q.size());
 
   MultibodyModel const model = legged_ctrl::urdf_parser::parse_urdf("assets/ur5.urdf");
 
@@ -95,10 +47,10 @@ std::vector<StateWithTimestamp> simulate_joint_space_control(json const &config,
   while (time < simulation_time) {
     q_des = q0.array() + amplitude.array() * Eigen::sin(two_pi_f.array() * time + phi.array());
     qd_des = two_pi_f_amp.array() * Eigen::cos(two_pi_f.array() * time + phi.array());
-//    qdd_des = two_pi_f_squared_amp.array() * -Eigen::sin(two_pi_f.array() * time + phi.array());
+    //    qdd_des = two_pi_f_squared_amp.array() * -Eigen::sin(two_pi_f.array() * time + phi.array());
 
-//    auto const J6 = compute_end_effector_frame_jacobian(model, q, LOCAL_WORLD_ALIGNED);
-//    auto const J = J6.topRows(3);
+    //    auto const J6 = compute_end_effector_frame_jacobian(model, q, LOCAL_WORLD_ALIGNED);
+    //    auto const J = J6.topRows(3);
 
     tau = kp * (q_des - q) + kd * (qd_des - qd);
 
@@ -107,7 +59,7 @@ std::vector<StateWithTimestamp> simulate_joint_space_control(json const &config,
 
     qdd = M_inv * (tau - C);
     qd = qd + qdd * dt;
-    q = q + dt * qd + 0.5 * dt * dt * qdd; // NOLINT
+    q = q + dt * qd + 0.5 * dt * dt * qdd;// NOLINT
 
     simulated_trajectory.emplace_back(time, q);
     time += dt;
@@ -124,7 +76,7 @@ int main()
   auto logger = *spdlog::stdout_color_mt("lcc_joint_space_control");
   logger.set_level(spdlog::level::debug);
 
-  auto optional_config = read_config(logger);
+  auto optional_config = read_config("src/samples/joint_space_control/config.json", logger);
 
   if (!optional_config) {
     logger.error("Failed to read config file");
