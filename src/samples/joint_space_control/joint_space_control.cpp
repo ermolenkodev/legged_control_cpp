@@ -11,6 +11,7 @@ using namespace legged_ctrl;
 using json = nlohmann::json;
 
 #define ENABLE_GRAVITY_COMPENSATION 0
+#define ENABLE_FEEDFORWARD 1
 
 std::vector<StateWithTimestamp> simulate_joint_space_control(json const &config, spdlog::logger &logger)
 {
@@ -27,7 +28,11 @@ std::vector<StateWithTimestamp> simulate_joint_space_control(json const &config,
 
   VectorX q_des;
   VectorX qd_des;
-  //  VectorX qdd_des = VectorX::Zero(q.size());
+#if ENABLE_FEEDFORWARD
+  VectorX qdd_des;
+  // TODO fix this
+  VectorX const two_pi_f_squared_amp = two_pi_f.array() * two_pi_f_amp.array();
+#endif
 
   MultibodyModel const model = legged_ctrl::urdf_parser::parse_urdf("assets/ur5.urdf");
 
@@ -54,9 +59,17 @@ std::vector<StateWithTimestamp> simulate_joint_space_control(json const &config,
 
     auto [M, C] = crba(model, { q, qd }, ExternalForces{ VectorX::Zero(q.size()) });
     auto M_inv = M.inverse();
+
 #if ENABLE_GRAVITY_COMPENSATION
     auto g = compute_gravity_effect(model, { q, qd }, ExternalForces::none());
     tau = kp * (q_des - q) + kd * (qd_des - qd) + g;
+#elif ENABLE_FEEDFORWARD
+    qdd_des = two_pi_f_squared_amp.array() * -Eigen::sin(two_pi_f.array() * time + phi.array());
+    auto g = compute_gravity_effect(model, { q, qd }, ExternalForces::none());
+    auto [M_des, _] =
+      crba(model, { q_des, qd }, ExternalForces::none());// Mass matrix doesn't depend on joint velocities
+
+    tau = diag(M_des) * qdd_des + kp * (q_des - q) + kd * (qd_des - qd) + g;
 #else
     tau = kp * (q_des - q) + kd * (qd_des - qd);
 #endif

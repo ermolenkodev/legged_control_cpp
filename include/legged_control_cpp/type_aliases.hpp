@@ -32,6 +32,7 @@ using LinkNameToIndexMapPtr = std::shared_ptr<LinkNameToIndexMap>;
 using JointSpaceMatrix = Eigen::MatrixXd;
 using JacobianMatrix = Eigen::MatrixXd;
 using IndexedSpatialMatrices = std::unordered_map<int, SpatialMatrix>;
+using DiagonalMatrix = Eigen::DiagonalMatrix<double, Eigen::Dynamic>;
 
 }// namespace legged_ctrl
 

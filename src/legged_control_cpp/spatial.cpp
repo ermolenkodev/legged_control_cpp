@@ -62,4 +62,12 @@ SE3 translation_part(SE3 const &T)
   return T_translation;
 }
 
+DiagonalMatrix diag(JointSpaceMatrix const &M)
+{
+  DiagonalMatrix D{ M.rows() };
+  D.diagonal() = M.diagonal();
+
+  return D;
+}
+
 }// namespace legged_ctrl

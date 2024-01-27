@@ -134,6 +134,8 @@ SpatialMatrix translation_part(SpatialMatrix const &X);
 
 SE3 translation_part(SE3 const &T);
 
+DiagonalMatrix diag(JointSpaceMatrix const &M);
+
 }// namespace legged_ctrl
 
 #endif
