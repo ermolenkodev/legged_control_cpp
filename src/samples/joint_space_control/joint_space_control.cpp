@@ -11,7 +11,8 @@ using namespace legged_ctrl;
 using json = nlohmann::json;
 
 #define ENABLE_GRAVITY_COMPENSATION 0
-#define ENABLE_FEEDFORWARD 1
+#define ENABLE_FEEDFORWARD 0
+#define ENABLE_INVERSE_DYNAMICS 1
 
 std::vector<StateWithTimestamp> simulate_joint_space_control(json const &config, spdlog::logger &logger)
 {
@@ -28,7 +29,7 @@ std::vector<StateWithTimestamp> simulate_joint_space_control(json const &config,
 
   VectorX q_des;
   VectorX qd_des;
-#if ENABLE_FEEDFORWARD
+#if ENABLE_FEEDFORWARD || ENABLE_INVERSE_DYNAMICS
   VectorX qdd_des;
   // TODO fix this
   VectorX const two_pi_f_squared_amp = two_pi_f.array() * two_pi_f_amp.array();
@@ -70,6 +71,9 @@ std::vector<StateWithTimestamp> simulate_joint_space_control(json const &config,
       crba(model, { q_des, qd }, ExternalForces::none());// Mass matrix doesn't depend on joint velocities
 
     tau = diag(M_des) * qdd_des + kp * (q_des - q) + kd * (qd_des - qd) + g;
+#elif ENABLE_INVERSE_DYNAMICS
+    qdd_des = two_pi_f_squared_amp.array() * -Eigen::sin(two_pi_f.array() * time + phi.array());
+    tau = M * (qdd_des + kp * (q_des - q) + kd * (qd_des - qd)) + C;
 #else
     tau = kp * (q_des - q) + kd * (qd_des - qd);
 #endif
