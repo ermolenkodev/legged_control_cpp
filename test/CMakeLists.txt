@@ -72,3 +72,35 @@ catch_discover_tests(
         "relaxed_constexpr."
         OUTPUT_SUFFIX
         .xml)
+
+add_executable(inverse_dynamics_tests inverse_dynamics_tests.cpp)
+target_link_system_libraries(
+        inverse_dynamics_tests
+        PRIVATE
+        spdlog::spdlog)
+target_link_libraries(
+        inverse_dynamics_tests
+        PRIVATE legged_control_cpp::legged_control_cpp_warnings
+        legged_control_cpp::legged_control_cpp_options
+        legged_control_cpp::legged_control_lib
+        Catch2::Catch2WithMain)
+
+target_include_directories(
+        inverse_dynamics_tests
+        PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/test_data)
+
+target_compile_definitions(inverse_dynamics_tests PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../assets")
+
+catch_discover_tests(
+        inverse_dynamics_tests
+        TEST_PREFIX
+        "inverse_dynamics."
+        REPORTER
+        XML
+        OUTPUT_DIR
+        .
+        OUTPUT_PREFIX
+        "inverse_dynamics."
+        OUTPUT_SUFFIX
+        .xml)

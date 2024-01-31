@@ -17,11 +17,11 @@ The primary goal is to develop all these algorithms from scratch (possibly exclu
   - [x] Jacobian computation
   - [ ] Classic acceleration computation
 - [ ] Manipulator Control
-  - [ ] Joint Space Control
+  - [x] Joint Space Control
     - [x] Simple PD Control
     - [x] PD Control with Gravity Compensation
     - [x] Feedforward Control
-    - [ ] Inverse Dynamics Control
+    - [x] Inverse Dynamics Control
   - [ ] Operational Space Control
   - [ ] Contact consistent dynamics
 - [ ] Legged Robot Control
