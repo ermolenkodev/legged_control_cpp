@@ -1,10 +1,10 @@
 #include "cmath"
-#include "legged_control_cpp/forward_dynamics.hpp"
-// #include "legged_control_cpp/jacobian.hpp"
 #include "config.hpp"
+#include "legged_control_cpp/forward_dynamics.hpp"
 #include "legged_control_cpp/type_aliases.hpp"
 #include "legged_control_cpp/urdf.hpp"
 #include "trajectory_io.hpp"
+#include <thread>
 
 using namespace legged_ctrl;
 
@@ -54,9 +54,6 @@ std::vector<StateWithTimestamp> simulate_joint_space_control(json const &config,
   while (time < simulation_time) {
     q_des = q0.array() + amplitude.array() * Eigen::sin(two_pi_f.array() * time + phi.array());
     qd_des = two_pi_f_amp.array() * Eigen::cos(two_pi_f.array() * time + phi.array());
-
-    //    auto const J6 = compute_end_effector_frame_jacobian(model, q, LOCAL_WORLD_ALIGNED);
-    //    auto const J = J6.topRows(3);
 
     auto [M, C] = crba(model, { q, qd }, ExternalForces{ VectorX::Zero(q.size()) });
     auto M_inv = M.inverse();
