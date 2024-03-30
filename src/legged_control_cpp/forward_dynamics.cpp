@@ -64,7 +64,7 @@ JointSpaceMatrix compute_mass_matrix_crba(MultibodyModel const &model,
   return M;
 }
 
-SpatialVector compute_gravity_effect(const MultibodyModel &model,
+VectorX compute_gravity_effect(const MultibodyModel &model,
   const SystemConfiguration &system_configuration,
   ExternalForces const &external_forces,
   Vector3 const &gravity)

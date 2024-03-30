@@ -27,7 +27,7 @@ CRBAResult crba(MultibodyModel const &model,
 std::vector<SpatialMatrix> compute_composite_inertia(const MultibodyModel &model,
   const std::vector<SpatialMatrix> &Xup);
 
-SpatialVector compute_gravity_effect(MultibodyModel const &model,
+VectorX compute_gravity_effect(MultibodyModel const &model,
   SystemConfiguration const &system_configuration,
   ExternalForces const &external_forces = ExternalForces::none(),
   Vector3 const &gravity = Vector3 { 0, 0, G });
