@@ -20,6 +20,8 @@ public:
 
   [[nodiscard]] SpatialVector screw_axis() const { return this->derived().screw_axis_impl(); }
 
+  bool operator==(JointMetadata const &other) const { return this->derived().operator==(other.derived()); }
+
 private:
   JointMetadata() = default;
   friend Derived;
@@ -53,6 +55,8 @@ public:
     result(static_cast<int>(axis_)) = 1;
     return result;
   }
+
+  bool operator==(RevoluteJoint const &other) const { return axis_ == other.axis_; }
 
 private:
   JointAxis axis_;
