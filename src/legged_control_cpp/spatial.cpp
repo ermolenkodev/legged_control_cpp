@@ -47,7 +47,7 @@ SpatialMatrix translation_part(SpatialMatrix const &X)
 {
   SpatialMatrix X_translation = X;
   SO3 const &R = X.template topLeftCorner<3, 3>();
-  X_translation.bottomLeftCorner<3, 3>() =  X.template bottomLeftCorner<3, 3>() * R.transpose();
+  X_translation.bottomLeftCorner<3, 3>() = X.template bottomLeftCorner<3, 3>() * R.transpose();
   X_translation.topLeftCorner<3, 3>().setIdentity();
   X_translation.bottomRightCorner<3, 3>().setIdentity();
 
@@ -68,6 +68,14 @@ DiagonalMatrix diag(JointSpaceMatrix const &M)
   D.diagonal() = M.diagonal();
 
   return D;
+}
+
+Vector3 vector_from_SO3(SkewSymmetric const &S)
+{
+  Vector3 v;
+  v << S(2, 1), S(0, 2), S(1, 0);
+
+  return v;
 }
 
 }// namespace legged_ctrl
