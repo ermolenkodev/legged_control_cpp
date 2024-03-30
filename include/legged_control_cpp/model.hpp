@@ -41,6 +41,8 @@ public:
   [[nodiscard]] int num_bodies() const { return n_bodies_; }
 
   [[nodiscard]] std::vector<int> get_parent_idxs() const { return parent_; }
+
+  bool operator==(MultibodyModel const &other) const;
 };
 
 const double G = -9.81;
