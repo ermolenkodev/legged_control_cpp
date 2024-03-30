@@ -136,6 +136,8 @@ SE3 translation_part(SE3 const &T);
 
 DiagonalMatrix diag(JointSpaceMatrix const &M);
 
+Vector3 vector_from_SO3(SkewSymmetric const &S);
+
 }// namespace legged_ctrl
 
 #endif
