@@ -3,7 +3,7 @@
 
 namespace legged_ctrl {
 
-MultibodyModelBuilderWithoutRoot MultibodyModel::create() { return MultibodyModelBuilderWithoutRoot{}; }
+MultibodyModelBuilderWithoutRoot MultibodyModel::create_from_urdf() { return MultibodyModelBuilderWithoutRoot{}; }
 
 std::ostream &operator<<(std::ostream &os, MultibodyModel const &model)
 {
