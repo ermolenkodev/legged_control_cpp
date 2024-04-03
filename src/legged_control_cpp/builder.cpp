@@ -2,10 +2,13 @@
 
 #include "fmt/core.h"
 #include "legged_control_cpp/type_aliases.hpp"
+#include "legged_control_cpp/utilities.hpp"
 #include <utility>
 
 
 namespace legged_ctrl {
+
+using namespace details;
 
 MultibodyModelBuilderBase::MultibodyModelBuilderBase(ModelPtr model, LinkNameToIndexMapPtr link_name_to_idx)
   : model_{ std::move(model) }, link_name_to_idx_{ std::move(link_name_to_idx) }
@@ -60,21 +63,6 @@ bool operator==(::urdf::Vector3 const &lhs, urdf::Vector3 const &rhs)
   return close_enough(lhs.x, rhs.x) && close_enough(lhs.y, rhs.y) && close_enough(lhs.z, rhs.z);
 }
 
-JointAxis extract_joint_axis(const ::urdf::Vector3 &axis)
-{
-  using AxisVec = std::tuple<::urdf::Vector3, JointAxis>;
-
-  std::array<AxisVec, 3> const axis_mappings{ std::make_tuple(::urdf::Vector3(1., 0., 0.), JointAxis::X),
-    std::make_tuple(::urdf::Vector3(0., 1., 0.), JointAxis::Y),
-    std::make_tuple(::urdf::Vector3(0., 0., 1.), JointAxis::Z) };
-
-  for (auto const &[vec, joint_axis] : axis_mappings) {
-    if (axis == vec) { return joint_axis; }
-  }
-
-  return JointAxis::UNALIGNED;
-}
-
 SE3 convert_from_urdf(::urdf::Pose const &pose)
 {
   ::urdf::Vector3 const &p = pose.position;
@@ -87,14 +75,19 @@ SE3 convert_from_urdf(::urdf::Pose const &pose)
   return T;
 }
 
-void not_implemented() { throw std::runtime_error("Function not yet implemented"); }
+namespace {
+  std::array<double, 3> convert_to_array(::urdf::Vector3 const &vec)
+  {
+    return { vec.x, vec.y, vec.z };
+  }
+}
 
 MultibodyModelBuilder &MultibodyModelBuilder::add_link(::urdf::LinkConstSharedPtr const &link)
 {
   logger_->debug("Processing link: {}", link->name);
 
   if (link->parent_joint->type == ::urdf::Joint::REVOLUTE) {
-    auto joint = RevoluteJoint(extract_joint_axis(link->parent_joint->axis));
+    auto joint = RevoluteJoint(details::determine_joint_axis(convert_to_array(link->parent_joint->axis)));
     model_->joints_.emplace_back(joint);
   } else if (link->parent_joint->type == ::urdf::Joint::FIXED) {
     if (link->name == "ee_link") {
@@ -144,6 +137,19 @@ MultibodyModelBuilder &MultibodyModelBuilder::add_link(::urdf::LinkConstSharedPt
   model_->I_.emplace_back(I);
 
   return *this;
+}
+
+constexpr std::array<AxisVec, 3> const axis_mappings{ AxisVec{ { 1., 0., 0. }, JointAxis::X },
+  AxisVec{ { 0., 1., 0. }, JointAxis::Y },
+  AxisVec{ { 0., 0., 1. }, JointAxis::Z } };
+
+JointAxis details::determine_joint_axis(std::array<double, 3> const &vec)
+{
+  for (auto const &[axis, joint_axis] : axis_mappings) {
+    if (vec == axis) { return joint_axis; }
+  }
+
+  return JointAxis::UNALIGNED;
 }
 
 }// namespace legged_ctrl

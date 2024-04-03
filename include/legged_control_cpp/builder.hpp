@@ -50,6 +50,13 @@ private:
   friend class MultibodyModelBuilderWithoutRoot;
 };
 
+namespace details {
+  using AxisVec = std::pair<std::array<double, 3>, JointAxis>;
+
+  JointAxis determine_joint_axis(std::array<double, 3> const &vec);
+}// namespace details
+
+
 }// namespace legged_ctrl
 
 #endif
