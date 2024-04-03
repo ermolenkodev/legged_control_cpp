@@ -30,7 +30,7 @@ public:
   std::vector<SpatialMatrix> I_{};
   std::optional<SE3> nTee_{ std::nullopt };
 
-  static MultibodyModelBuilderWithoutRoot create();
+  static MultibodyModelBuilderWithoutRoot create_from_urdf();
   friend class MultibodyModelBuilderWithoutRoot;
   friend class MultibodyModelBuilder;
 
