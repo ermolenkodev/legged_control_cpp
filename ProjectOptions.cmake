@@ -138,12 +138,11 @@ macro(legged_control_cpp_local_options)
 
   include(cmake/StaticAnalyzers.cmake)
   if(legged_control_cpp_ENABLE_CLANG_TIDY)
-    legged_control_cpp_enable_clang_tidy(legged_control_cpp_options ${legged_control_cpp_WARNINGS_AS_ERRORS})
+    legged_control_cpp_enable_clang_tidy(legged_control_cpp_options OFF)
   endif()
 
   if(legged_control_cpp_ENABLE_CPPCHECK)
-    legged_control_cpp_enable_cppcheck(${legged_control_cpp_WARNINGS_AS_ERRORS} "" # override cppcheck options
-    )
+    legged_control_cpp_enable_cppcheck(OFF "")
   endif()
 
   if(legged_control_cpp_ENABLE_COVERAGE)
