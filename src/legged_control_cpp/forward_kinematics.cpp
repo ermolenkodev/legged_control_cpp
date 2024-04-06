@@ -2,6 +2,7 @@
 #include "legged_control_cpp/model.hpp"
 #include "legged_control_cpp/spatial.hpp"
 #include "legged_control_cpp/type_aliases.hpp"
+#include "legged_control_cpp/utilities.hpp"
 #include <stdexcept>
 #include <variant>
 
@@ -11,6 +12,7 @@ namespace details {
   Placement extract_placement(SpatialMatrix const &X);
 }
 
+LCC_DISABLE_SIGN_CONVERSION
 Placement compute_end_effector_placement(MultibodyModel const &model, VectorX const &q)
 {
   auto const &[name, n_bodies, joints, parent, X_tree, I, _] = model;
@@ -32,11 +34,11 @@ Placement compute_end_effector_placement(MultibodyModel const &model, VectorX co
 
   return details::extract_placement(wXee);
 }
+LCC_END_DISABLE_WARNINGS
 
 Placement details::extract_placement(SpatialMatrix const &X)
 {
   SO3 const &R = X.template topLeftCorner<3, 3>();
-  SpatialMatrix const spatial_translation = translation_part(X);
   SkewSymmetric const translation_so3 = translation_part(X).bottomLeftCorner<3, 3>();
 
   return { vector_from_SO3(translation_so3), R };

@@ -1,13 +1,10 @@
 #include "legged_control_cpp/inverse_dynamics.hpp"
 #include "legged_control_cpp/external_forces.hpp"
+#include "legged_control_cpp/utilities.hpp"
 
 namespace legged_ctrl {
 
-#pragma clang diagnostic push
-#pragma GCC diagnostic push
-#pragma clang diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-
+LCC_DISABLE_SIGN_CONVERSION
 RNEAExtendedOutput details::rnea_with_extended_output(const MultibodyModel &model,
   const VectorX &q,
   const VectorX &qd,
@@ -56,9 +53,7 @@ RNEAExtendedOutput details::rnea_with_extended_output(const MultibodyModel &mode
 
   return RNEAExtendedOutput{ V, A, F, Xup, S, tau };
 }
-
-#pragma clang diagnostic pop
-#pragma GCC diagnostic pop
+LCC_END_DISABLE_WARNINGS
 
 RNEAExtendedOutput rnea_with_extended_output(MultibodyModel const &model,
   SystemConfiguration const &systemConfiguration,

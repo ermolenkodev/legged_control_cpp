@@ -1,4 +1,5 @@
 #include "legged_control_cpp/external_forces.hpp"
+#include "legged_control_cpp/utilities.hpp"
 
 namespace legged_ctrl {
 
@@ -15,11 +16,7 @@ void apply_end_effector_exerted_force(IndexedSpatialVectors &F,
   last_link_wrench += X_n_ee.transpose() * external_forces.f_tip.value();
 }
 
-#pragma clang diagnostic push
-#pragma GCC diagnostic push
-#pragma clang diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-
+LCC_DISABLE_SIGN_CONVERSION
 void apply_external_forces(IndexedSpatialVectors &F,
   ExternalForces const &external_forces,
   MultibodyModel const &model,
@@ -41,8 +38,6 @@ void apply_external_forces(IndexedSpatialVectors &F,
     }
   }
 }
-
-#pragma clang diagnostic pop
-#pragma GCC diagnostic pop
+LCC_END_DISABLE_WARNINGS
 
 }// namespace legged_ctrl
