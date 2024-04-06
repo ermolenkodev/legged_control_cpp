@@ -104,3 +104,36 @@ catch_discover_tests(
         "inverse_dynamics."
         OUTPUT_SUFFIX
         .xml)
+
+add_executable(mjxml_parsing_tests mjxml_parsing_tests.cpp)
+target_link_system_libraries(
+        mjxml_parsing_tests
+        PRIVATE
+        spdlog::spdlog)
+
+target_link_libraries(
+        mjxml_parsing_tests
+        PRIVATE legged_control_cpp::legged_control_cpp_warnings
+        legged_control_cpp::legged_control_cpp_options
+        legged_control_cpp::legged_control_lib
+        Catch2::Catch2WithMain)
+
+target_include_directories(
+        mjxml_parsing_tests
+        PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/test_data)
+
+target_compile_definitions(mjxml_parsing_tests PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../assets")
+
+catch_discover_tests(
+        mjxml_parsing_tests
+        TEST_PREFIX
+        "mjxml_parsing."
+        REPORTER
+        XML
+        OUTPUT_DIR
+        .
+        OUTPUT_PREFIX
+        "mjxml_parsing."
+        OUTPUT_SUFFIX
+        .xml)
