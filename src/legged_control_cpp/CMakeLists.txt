@@ -1,9 +1,12 @@
 include(GenerateExportHeader)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake")
+
 find_package(urdfdom REQUIRED)
+find_package(TinyXML2 REQUIRED)
 
 add_library(legged_control_lib builder.cpp model.cpp urdf.cpp spatial.cpp inverse_dynamics.cpp logging.cpp external_forces.cpp
-            forward_dynamics.cpp jacobian.cpp)
+            forward_dynamics.cpp jacobian.cpp mjxml/mjxml.cpp mjxml/mjxml_defaults.cpp mjxml/mjxml_utils.cpp mjxml/mjxml_builder.cpp forward_kinematics.cpp utilities.cpp)
 
 add_library(legged_control_cpp::legged_control_lib ALIAS legged_control_lib)
 
@@ -14,6 +17,8 @@ target_link_libraries(
 
 target_include_directories(legged_control_lib ${WARNING_GUARD} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>)
+
+target_include_directories(legged_control_lib ${WARNING_GUARD} PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/mjxml>)
 
 target_include_directories(legged_control_lib ${WARNING_GUARD} SYSTEM PUBLIC
         $<TARGET_PROPERTY:Eigen3::Eigen,INTERFACE_INCLUDE_DIRECTORIES>)
@@ -29,7 +34,8 @@ target_link_system_libraries(
         fmt::fmt
         spdlog::spdlog
         ${urdfdom_LIBRARIES}
-        lefticus::tools)
+        lefticus::tools
+        tinyxml2::tinyxml2)
 
 target_include_directories(legged_control_lib PRIVATE "${CMAKE_BINARY_DIR}/configured_files/include")
 
