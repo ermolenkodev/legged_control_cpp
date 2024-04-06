@@ -14,6 +14,9 @@ namespace legged_ctrl {
 
 class MultibodyModelBuilder;
 class MultibodyModelBuilderWithoutRoot;
+namespace mjxml {
+  class MjxmlModelBuilderWithoutRoot;
+}
 
 }// namespace legged_ctrl
 
@@ -31,6 +34,7 @@ public:
   std::optional<SE3> nTee_{ std::nullopt };
 
   static MultibodyModelBuilderWithoutRoot create_from_urdf();
+  static mjxml::MjxmlModelBuilderWithoutRoot create_from_mjxml();
   friend class MultibodyModelBuilderWithoutRoot;
   friend class MultibodyModelBuilder;
 
