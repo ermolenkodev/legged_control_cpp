@@ -1,5 +1,6 @@
 #include "legged_control_cpp/forward_dynamics.hpp"
 #include "legged_control_cpp/inverse_dynamics.hpp"
+#include "legged_control_cpp/utilities.hpp"
 
 namespace legged_ctrl {
 
@@ -22,11 +23,7 @@ CRBAResult crba(MultibodyModel const &model,
   return { mass_matrix, C };
 }
 
-#pragma clang diagnostic push
-#pragma GCC diagnostic push
-#pragma clang diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-
+LCC_DISABLE_SIGN_CONVERSION
 std::vector<SpatialMatrix> compute_composite_inertia(const MultibodyModel &model, const std::vector<SpatialMatrix> &Xup)
 {
   int const n_bodies = model.num_bodies();
@@ -75,8 +72,6 @@ VectorX compute_gravity_effect(const MultibodyModel &model,
 
   return result.g();
 }
-
-#pragma clang diagnostic pop
-#pragma GCC diagnostic pop
+LCC_END_DISABLE_WARNINGS
 
 }// namespace legged_ctrl

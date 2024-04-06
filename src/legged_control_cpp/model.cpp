@@ -1,6 +1,7 @@
 #include "legged_control_cpp/model.hpp"
 #include "legged_control_cpp/builder.hpp"
 #include "legged_control_cpp/mjxml/mjxml_builder.hpp"
+#include "legged_control_cpp/utilities.hpp"
 
 namespace legged_ctrl {
 
@@ -15,6 +16,7 @@ std::ostream &operator<<(std::ostream &os, MultibodyModel const &model)
   return os;
 }
 
+LCC_DISABLE_SIGN_CONVERSION
 bool MultibodyModel::operator==(const MultibodyModel &other) const
 {
   if (n_bodies_ != other.n_bodies_) { return false; }
@@ -28,5 +30,6 @@ bool MultibodyModel::operator==(const MultibodyModel &other) const
 
   return true;
 }
+LCC_END_DISABLE_WARNINGS
 
 }// namespace legged_ctrl

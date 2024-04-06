@@ -1,12 +1,9 @@
 #include "legged_control_cpp/jacobian.hpp"
+#include "legged_control_cpp/utilities.hpp"
 
 namespace legged_ctrl {
 
-#pragma clang diagnostic push
-#pragma GCC diagnostic push
-#pragma clang diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-
+LCC_DISABLE_SIGN_CONVERSION
 JacobianMatrix compute_end_effector_frame_jacobian(MultibodyModel const &model, VectorX const &q, ReferenceFrame const reference_frame)
 {
   auto const &[name, n_bodies, joints, parent, X_tree, I, _] = model;
@@ -36,8 +33,6 @@ JacobianMatrix compute_end_effector_frame_jacobian(MultibodyModel const &model, 
 
   return J;
 }
-
-#pragma clang diagnostic pop
-#pragma GCC diagnostic pop
+LCC_END_DISABLE_WARNINGS
 
 }// namespace legged_ctrl
