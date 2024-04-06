@@ -8,7 +8,7 @@
 
 namespace legged_ctrl {
 
-using namespace details;
+using namespace builder::details;
 
 MultibodyModelBuilderBase::MultibodyModelBuilderBase(ModelPtr model, LinkNameToIndexMapPtr link_name_to_idx)
   : model_{ std::move(model) }, link_name_to_idx_{ std::move(link_name_to_idx) }
@@ -87,7 +87,7 @@ MultibodyModelBuilder &MultibodyModelBuilder::add_link(::urdf::LinkConstSharedPt
   logger_->debug("Processing link: {}", link->name);
 
   if (link->parent_joint->type == ::urdf::Joint::REVOLUTE) {
-    auto joint = RevoluteJoint(details::determine_joint_axis(convert_to_array(link->parent_joint->axis)));
+    auto joint = RevoluteJoint(determine_joint_axis(convert_to_array(link->parent_joint->axis)));
     model_->joints_.emplace_back(joint);
   } else if (link->parent_joint->type == ::urdf::Joint::FIXED) {
     if (link->name == "ee_link") {
@@ -143,7 +143,7 @@ constexpr std::array<AxisVec, 3> const axis_mappings{ AxisVec{ { 1., 0., 0. }, J
   AxisVec{ { 0., 1., 0. }, JointAxis::Y },
   AxisVec{ { 0., 0., 1. }, JointAxis::Z } };
 
-JointAxis details::determine_joint_axis(std::array<double, 3> const &vec)
+JointAxis builder::details::determine_joint_axis(std::array<double, 3> const &vec)
 {
   for (auto const &[axis, joint_axis] : axis_mappings) {
     if (vec == axis) { return joint_axis; }
