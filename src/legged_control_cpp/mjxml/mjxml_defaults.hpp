@@ -33,8 +33,7 @@ namespace details {
 
   Default::DefaultPtr construct_defaults_tree(tinyxml2::XMLElement const *top_level_default);
 
-  void traverse_defaults_tree(Default::DefaultPtr const &node,
-    std::unordered_map<std::string, ModelElementClass> &model_elements);
+  std::unordered_map<std::string, ModelElementClass> traverse_defaults_tree(Default::DefaultPtr const &root);
 }// namespace details
 
 }// namespace legged_ctrl::mjxml::details

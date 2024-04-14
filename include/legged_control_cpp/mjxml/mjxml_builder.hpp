@@ -20,7 +20,7 @@ class MjxmlMultibodyModelBuilder : public MultibodyModelBuilderBase
 {
 public:
   MjxmlMultibodyModelBuilder &add_link(tinyxml2::XMLElement const *link_xml,
-    std::string const &parent_link_name,
+    tinyxml2::XMLElement const *parent_link_xml,
     std::string const &inherited_class);
 
   MjxmlMultibodyModelBuilder &set_logger(spdlog::logger logger) override;
@@ -34,7 +34,7 @@ private:
     std::string const &class_name);
 
   SpatialMatrix process_inertia(const std::string &inherited_class, const tinyxml2::XMLElement *inertial);
-  RevoluteJoint process_joint(const std::string &inherited_class, const tinyxml2::XMLElement *joint);
+  RevoluteJoint process_joint(const std::string &inherited_class, const tinyxml2::XMLElement *joint_xml);
 
   friend class MjxmlModelBuilderWithoutRoot;
 };
