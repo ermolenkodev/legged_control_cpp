@@ -22,6 +22,6 @@ MultibodyModel iiwa14_model_urdf()
 
 MultibodyModel iiwa14_model_mjxml()
 {
-  std::string const mjxml_path = std::string(ASSETS_PATH) + "/iiwa14.xml";
+  std::string const mjxml_path = std::string(ASSETS_PATH) + "/scene/iiwa14.xml";
   return mjxml::parse_mujoco_xml(mjxml_path);
 }
