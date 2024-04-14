@@ -138,6 +138,8 @@ DiagonalMatrix diag(JointSpaceMatrix const &M);
 
 Vector3 vector_from_SO3(SkewSymmetric const &S);
 
+std::pair<double, Vector3> angle_axis_from_SO3(SO3 const &R);
+
 }// namespace legged_ctrl
 
 #endif
