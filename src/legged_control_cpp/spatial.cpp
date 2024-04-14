@@ -79,14 +79,14 @@ Vector3 vector_from_SO3(SkewSymmetric const &S)
 }
 
 namespace {
-  bool near_zero(double value, double tolerance = 1e-6) { return std::abs(value) < tolerance; }
+  bool near_zero(double value, double tolerance = 1e-6) { return std::abs(value) < tolerance; }// NOLINT
 }// namespace
 
 std::pair<double, Vector3> angle_axis_from_SO3(SO3 const &R)
 {
-  double y = std::sqrt(std::pow(R(2, 1) - R(1, 2), 2) + std::pow(R(0, 2) - R(2, 0), 2)
-                       + std::pow(R(1, 0) - R(0, 1), 2));
-  double x = R(0, 0) + R(1, 1) + R(2, 2) - 1;
+  double const y =
+    std::sqrt(std::pow(R(2, 1) - R(1, 2), 2) + std::pow(R(0, 2) - R(2, 0), 2) + std::pow(R(1, 0) - R(0, 1), 2));
+  double const x = R(0, 0) + R(1, 1) + R(2, 2) - 1;
   double delta_theta = std::atan2(y, x);
 
   Vector3 r_hat;
@@ -95,15 +95,16 @@ std::pair<double, Vector3> angle_axis_from_SO3(SO3 const &R)
     r_hat << 0, 0, 1;
   } else if (near_zero(R.trace() + 1)) {// approx -1
     delta_theta = M_PI;
+    double scale;// NOLINT
     if (!near_zero(1 + R(2, 2))) {
-      double scale = 1.0 / std::sqrt(2 * (1 + R(2, 2)));
+      scale = 1.0 / std::sqrt(2 * (1 + R(2, 2)));
       r_hat = scale * Vector3(R(0, 2), R(1, 2), 1 + R(2, 2));
     } else if (!near_zero(1 + R(1, 1))) {
-      double scale = 1.0 / std::sqrt(2 * (1 + R(1, 1)));
+      scale = 1.0 / std::sqrt(2 * (1 + R(1, 1)));
       r_hat = scale * Vector3(R(0, 1), 1 + R(1, 1), R(2, 1));
     } else {
-      double scale = 1.0 / std::sqrt(2 * (1 + R(0, 0)));
-      r_hat = scale * Vector3 (1 + R(0, 0), R(1, 0), R(2, 0));
+      scale = 1.0 / std::sqrt(2 * (1 + R(0, 0)));
+      r_hat = scale * Vector3(1 + R(0, 0), R(1, 0), R(2, 0));
     }
   } else {
     r_hat << R(2, 1) - R(1, 2), R(0, 2) - R(2, 0), R(1, 0) - R(0, 1);

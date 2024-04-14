@@ -14,6 +14,13 @@ namespace legged_ctrl {
 
 void not_implemented();
 
+template <typename Tag, typename T>
+struct Tagged
+{
+  explicit Tagged(const T& value) : value{value} { }
+  T value;
+};
+
 }
 
 #endif

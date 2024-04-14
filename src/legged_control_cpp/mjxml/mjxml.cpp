@@ -6,24 +6,26 @@
 
 namespace legged_ctrl::mjxml {
 
+using namespace legged_ctrl::mjxml::attributes;
+
 void process_all_links(MjxmlMultibodyModelBuilder &builder, tinyxml2::XMLElement const *root_link);
 
 MultibodyModel parse_mujoco_xml(std::string const &filename, std::optional<spdlog::logger> const &logger_opt)
 {
   tinyxml2::XMLDocument doc;
-  tinyxml2::XMLError result = doc.LoadFile(filename.c_str());
+  tinyxml2::XMLError const result = doc.LoadFile(filename.c_str());
 
   spdlog::logger logger = logger_opt ? logger_opt.value() : *null_logger();
 
   if (result != tinyxml2::XML_SUCCESS) {
     logger.error("Error loading XML file!");
-    exit(1);
+    throw std::runtime_error("Error loading XML file!");
   }
 
   tinyxml2::XMLElement const *worldbody = doc.FirstChildElement("mujoco")->FirstChildElement("worldbody");
   if (worldbody == nullptr) {
     logger.error("No worldbody found in the XML file");
-    exit(1);
+    throw std::runtime_error("No worldbody found in the XML file");
   }
 
   tinyxml2::XMLElement const *root_link = worldbody->FirstChildElement("body");
@@ -37,7 +39,7 @@ MultibodyModel parse_mujoco_xml(std::string const &filename, std::optional<spdlo
 
 void process_all_links(MjxmlMultibodyModelBuilder &builder, tinyxml2::XMLElement const *root_link)
 {
-  std::string const childclass = details::get_attribute(root_link, "childclass", "main");
+  std::string const childclass = details::get_attribute(root_link, CHILDCLASS, AttributeValue { "main" });
 
   using LinkParentClass = std::tuple<tinyxml2::XMLElement const *, tinyxml2::XMLElement const *, std::string>;
   std::queue<LinkParentClass> link_queue;
@@ -52,11 +54,10 @@ void process_all_links(MjxmlMultibodyModelBuilder &builder, tinyxml2::XMLElement
 
     for (auto const *child = link->FirstChildElement("body"); child != nullptr;
          child = child->NextSiblingElement("body")) {
-      link_queue.emplace(child, link, details::get_attribute(link, "childclass", inherited_class));
+      link_queue.emplace(child, link, details::get_attribute(link, CHILDCLASS, AttributeValue { inherited_class }));
     }
 
-    std::string const parent_name = parent->Attribute("name");
-    builder.add_link(link, parent_name, inherited_class);
+    builder.add_link(link, parent, inherited_class);
   }
 }
 

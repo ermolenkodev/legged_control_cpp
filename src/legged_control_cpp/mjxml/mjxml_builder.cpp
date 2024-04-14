@@ -38,8 +38,8 @@ std::unordered_map<std::string, std::string>
 SE3 get_link_transform(tinyxml2::XMLElement const *link_xml,
   std::unordered_map<std::string, std::string> const &link_defaults)
 {
-  Vector3 const parent_P_i = parse_vector3(get_attribute(link_xml, "pos", link_defaults, "0 0 0").c_str());
-  Quaternion const q = parse_quaternion(get_attribute(link_xml, "quat", link_defaults, "1 0 0 0").c_str());
+  Vector3 const parent_P_i = parse_vector3(get_attribute(link_xml, POS, link_defaults, DEFAULT_POS));
+  Quaternion const q = parse_quaternion(get_attribute(link_xml, QUAT, link_defaults, DEFAULT_QUAT));
   SO3 const parent_R_i = q.matrix();
 
   SE3 T;
@@ -51,7 +51,7 @@ SE3 get_link_transform(tinyxml2::XMLElement const *link_xml,
 }
 
 MjxmlMultibodyModelBuilder &MjxmlMultibodyModelBuilder::add_link(tinyxml2::XMLElement const *link_xml,
-  std::string const &parent_link_name,
+  tinyxml2::XMLElement const *parent_link_xml,
   std::string const &inherited_class)
 {
   std::string const link_name = link_xml->Attribute("name");
@@ -59,15 +59,15 @@ MjxmlMultibodyModelBuilder &MjxmlMultibodyModelBuilder::add_link(tinyxml2::XMLEl
 
   tinyxml2::XMLElement const *inertial_xml = link_xml->FirstChildElement("inertial");
   if (inertial_xml != nullptr) {
-    SpatialMatrix I = process_inertia(inherited_class, inertial_xml);
-    model_->I_.emplace_back(I);
+    model_->I_.emplace_back(process_inertia(inherited_class, inertial_xml));
   } else {
-    std::string const link_class = get_attribute(link_xml, "class", inherited_class);
+    std::string const link_class = get_attribute(link_xml, CLASS, AttributeValue{ inherited_class });
     model_->nTee_ = get_link_transform(link_xml, get_attributes("body", link_class));
 
     return *this;
   }
 
+  std::string const parent_link_name = parent_link_xml->Attribute("name");
   if (link_name_to_idx_->find(parent_link_name) == link_name_to_idx_->end()) {
     throw std::invalid_argument(fmt::format(
       "Failed to process link: {}. Parent link {} not found, it must be added before", link_name, parent_link_name));
@@ -78,7 +78,7 @@ MjxmlMultibodyModelBuilder &MjxmlMultibodyModelBuilder::add_link(tinyxml2::XMLEl
   (*link_name_to_idx_)[link_name] = static_cast<int>((*model_).parent_.size() - 1);
   model_->n_bodies_++;
 
-  std::string const link_class = get_attribute(link_xml, "class", inherited_class);
+  std::string const link_class = get_attribute(link_xml, CLASS, AttributeValue{ inherited_class });
   SE3 const T = Tinv(get_link_transform(link_xml, get_attributes("body", link_class)));
   SpatialMatrix const X = Ad(T);
   model_->X_tree_.emplace_back(X);
@@ -95,11 +95,11 @@ MjxmlMultibodyModelBuilder &MjxmlMultibodyModelBuilder::add_link(tinyxml2::XMLEl
 RevoluteJoint MjxmlMultibodyModelBuilder::process_joint(const std::string &inherited_class,
   const tinyxml2::XMLElement *joint_xml)
 {
-  std::string const class_attribute = get_attribute(joint_xml, "class", inherited_class);
+  std::string const class_attribute = get_attribute(joint_xml, CLASS, AttributeValue { inherited_class });
   std::unordered_map<std::string, std::string> const defaults = get_attributes("joint", class_attribute);
-  std::string const type_attribute = get_attribute(joint_xml, "type", defaults, "hinge");
+  std::string const type_attribute = get_attribute(joint_xml, TYPE, defaults, DEFAULT_JOINT);
 
-  Vector3 const axis = parse_vector3(get_attribute(joint_xml, "axis", defaults, "0 0 1").c_str());
+  Vector3 const axis = parse_vector3(get_attribute(joint_xml, AXIS, defaults, DEFAULT_AXIS));
 
   if (type_attribute != "hinge") { not_implemented(); }
 
@@ -111,15 +111,15 @@ RevoluteJoint MjxmlMultibodyModelBuilder::process_joint(const std::string &inher
 SpatialMatrix MjxmlMultibodyModelBuilder::process_inertia(const std::string &inherited_class,
   const tinyxml2::XMLElement *inertial)
 {
-  std::string const inertial_class = get_attribute(inertial, "class", inherited_class);
+  std::string const inertial_class = get_attribute(inertial, CLASS, AttributeValue { inherited_class });
   std::unordered_map<std::string, std::string> const defaults = get_attributes("inertial", inertial_class);
 
-  Vector3 const i_P_C = parse_vector3(get_attribute(inertial, "pos", defaults, "0 0 0").c_str());
-  SO3 const i_R_C = parse_quaternion(get_attribute(inertial, "quat", defaults, "1 0 0 0").c_str()).matrix();
+  Vector3 const i_P_C = parse_vector3(get_attribute(inertial, POS, defaults, DEFAULT_POS));
+  SO3 const i_R_C = parse_quaternion(get_attribute(inertial, QUAT, defaults, DEFAULT_QUAT)).matrix();
   logger_->debug("CoM position: \n{}", matrix_to_str(i_P_C));
   logger_->debug("CoM orientation:\n{}", matrix_to_str(i_R_C));
 
-  Vector3 const diag_inertia = parse_vector3(get_attribute(inertial, "diaginertia", defaults, "0 0 0").c_str());
+  Vector3 const diag_inertia = parse_vector3(get_attribute(inertial, DIAGINERTIA, defaults, DEFAULT_DIAGINERTIA));
   RotationalInertia rotI_C_C;
   rotI_C_C << diag_inertia(0), 0, 0, 0, diag_inertia(1), 0, 0, 0, diag_inertia(2);
   logger_->debug("Rotation inertia in CoM frame:\n{}", matrix_to_str(rotI_C_C));
@@ -127,7 +127,7 @@ SpatialMatrix MjxmlMultibodyModelBuilder::process_inertia(const std::string &inh
   RotationalInertia const rotI_C_i = i_R_C * rotI_C_C * i_R_C.transpose();
   logger_->debug("Rotation inertia in link frame:\n{}", matrix_to_str(rotI_C_i));
 
-  double const mass = std::stod(get_attribute(inertial, "mass", defaults, "0"));
+  double const mass = std::stod(get_attribute(inertial, MASS, defaults, ZERO));
   auto I = I_from_rotinertia_about_com(rotI_C_i, i_P_C, mass);
   logger_->debug("Spatial inertia:\n{}", matrix_to_str(I));
 
@@ -150,7 +150,7 @@ MjxmlMultibodyModelBuilder &MjxmlMultibodyModelBuilder::set_defaults(const tinyx
 {
   if (defaults_xml == nullptr) { return *this; }
   Default::DefaultPtr const defaults_tree = construct_defaults_tree(defaults_xml);
-  traverse_defaults_tree(defaults_tree, model_elements_classes);
+  model_elements_classes = traverse_defaults_tree(defaults_tree);
 
   return *this;
 }

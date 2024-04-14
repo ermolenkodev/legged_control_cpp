@@ -8,7 +8,7 @@
 
 namespace legged_ctrl::mjxml {
 
-MultibodyModel parse_mujoco_xml(std::string const &filename, std::optional<spdlog::logger> const &logger = std::nullopt);
+MultibodyModel parse_mujoco_xml(std::string const &filename, std::optional<spdlog::logger> const &logger_opt = std::nullopt);
 
 struct DummyModelElement
 {
