@@ -1,26 +1,9 @@
 #include "mujoco_api.hpp"
+#include "gains.hpp"
 
 #define ASSETS_PATH CMAKE_ASSETS_PATH
 
 using namespace task_space_control;
-
-namespace {
-struct GainMatrices
-{
-  DiagonalMatrix Kp_pos;
-  DiagonalMatrix Kd_pos;
-  DiagonalMatrix Kp_orient;
-  DiagonalMatrix Kd_orient;
-
-  GainMatrices() : Kp_pos(3), Kd_pos(3), Kp_orient(3), Kd_orient(3)
-  {
-    Kp_pos.diagonal() = legged_ctrl::Vector3{ 500, 500, 500 };
-    Kd_pos.diagonal() = legged_ctrl::Vector3{ 50, 50, 50 };
-    Kp_orient.diagonal() = legged_ctrl::Vector3{ 10, 10, 10 };
-    Kd_orient.diagonal() = legged_ctrl::Vector3{ .1, .1, .1 };
-  }
-};
-}// namespace
 
 VectorX compute_control_torques(Mujoco const &mujoco, MultibodyModel const &model, int mocap_id, GainMatrices const &gains)
 {
@@ -61,79 +44,77 @@ VectorX compute_control_torques(Mujoco const &mujoco, MultibodyModel const &mode
 
 void simulation_and_control_loop(Mujoco &mujoco, std::string const &scene_path, MultibodyModel const &model)
 {
-  bool ok = mujoco.load_model(scene_path);
+  bool const ok = mujoco.load_model(scene_path);
   if (!ok) { throw std::runtime_error("Failed to load scene"); }
 
   mujoco.scene.set_state_from_keyframe("home");
 
-  int mocap_id = mujoco.scene.get_mocap_id("target");
-  std::vector<int> actuator_ids =
+  int const mocap_id = mujoco.scene.get_mocap_id("target");
+  std::vector<int> const actuator_ids =
     mujoco.scene.get_actuator_ids({ "joint1", "joint2", "joint3", "joint4", "joint5", "joint6", "joint7" });
 
-  GainMatrices gains{};
+  GainMatrices const gains{};
 
   while (!mujoco.gui.is_exit_requested()) {
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
     {
-      std::unique_lock<std::recursive_mutex> lock(mujoco.mutex());
+      std::unique_lock<std::recursive_mutex> const lock(mujoco.mutex());
 
-      if (!mujoco.gui.is_simulation_paused()) {
-        bool stepped = false;
-
-        auto const cpu_iteration_start = Mujoco::Clock::now();
-        double const sim_iteration_start = mujoco.time_api.get_sim_time();
-
-        if (mujoco.gui.is_ctrl_noise_enabled()) {
-          mujoco.simulator.init_ctrl_noise_with_stddev();
-        }
-
-        // out-of-sync (for any reason): reset sync times, step
-        if (mujoco.time_api.is_cpu_and_sim_time_out_of_sync(cpu_iteration_start, sim_iteration_start)) {
-          mujoco.time_api.synchronize_time(cpu_iteration_start, sim_iteration_start);
-          // run single step, let next iteration deal with timing
-          mujoco.simulator.step_simulation();
-          stepped = true;
-        }
-
-        // in-sync: step until ahead of cpu
-        else {
-          bool measured = false;
-          double prev_sim = mujoco.time_api.get_sim_time();
-
-          // step while sim lags behind cpu and within refreshTime
-          while (mujoco.time_api.is_sim_behind_cpu()
-                 and mujoco.time_api.is_sim_within_refresh_time(cpu_iteration_start, mujoco.gui.refresh_rate())) {
-            // measure slowdown before first step
-            if (!measured) {
-              mujoco.time_api.measure_slowdown_factor(cpu_iteration_start, sim_iteration_start);
-              measured = true;
-            }
-
-            VectorX tau = compute_control_torques(mujoco, model, mocap_id, gains);
-
-            mujoco.simulator.apply_control_torques(tau, actuator_ids);
-            mujoco.simulator.step_simulation();
-            stepped = true;
-
-            // break if reset
-            if (mujoco.time_api.get_sim_time() < prev_sim) { break; }
-          }
-        }
-
-        // save current state to history buffer
-        if (stepped) { mujoco.gui.save_current_state_to_history(); }
-      }
-
-      // paused
-      else {
+      if (mujoco.gui.is_simulation_paused()) {
         mujoco.simulator.forward();
         mujoco.time_api.mark_simulation_speed_as_changed();
+        continue;
       }
-    }// release std::lock_guard<std::mutex>
+
+      bool stepped = false;
+
+      auto const cpu_iteration_start = Mujoco::Clock::now();
+      double const sim_iteration_start = mujoco.time_api.get_sim_time();
+
+      if (mujoco.gui.is_ctrl_noise_enabled()) {
+        mujoco.simulator.init_ctrl_noise_with_stddev();
+      }
+
+      // out-of-sync (for any reason): reset sync times, step
+      if (mujoco.time_api.is_cpu_and_sim_time_out_of_sync(cpu_iteration_start, sim_iteration_start)) {
+        mujoco.time_api.synchronize_time(cpu_iteration_start, sim_iteration_start);
+        // run single step, let next iteration deal with timing
+        mujoco.simulator.step_simulation();
+        stepped = true;
+      }
+      // in-sync: step until ahead of cpu
+      else {
+        bool measured = false;
+        double const prev_sim = mujoco.time_api.get_sim_time();
+
+        // step while sim lags behind cpu and within refreshTime
+        while (mujoco.time_api.is_sim_behind_cpu()
+               and mujoco.time_api.is_sim_within_refresh_time(cpu_iteration_start, mujoco.gui.refresh_rate())) {
+          // measure slowdown before first step
+          if (!measured) {
+            mujoco.time_api.measure_slowdown_factor(cpu_iteration_start, sim_iteration_start);
+            measured = true;
+          }
+
+          VectorX const tau = compute_control_torques(mujoco, model, mocap_id, gains);
+
+          mujoco.simulator.apply_control_torques(tau, actuator_ids);
+          mujoco.simulator.step_simulation();
+          stepped = true;
+
+          // break if reset
+          if (mujoco.time_api.get_sim_time() < prev_sim) { break; }
+        }
+      }
+
+      // save current state to history buffer
+      if (stepped) { mujoco.gui.save_current_state_to_history(); }
+    }// release lock
   }
 }
 
-int main(int argc, char **argv)
+int main()
 {
   auto mujoco = Mujoco();
   MultibodyModel model = legged_ctrl::mjxml::parse_mujoco_xml(std::string(ASSETS_PATH) + "/scene/iiwa14.xml");

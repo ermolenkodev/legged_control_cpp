@@ -1,6 +1,7 @@
 #include "mujoco_api.hpp"
 
 namespace task_space_control {
+// NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-make-member-function-const)
 
 std::recursive_mutex &Mujoco::mutex() const { return mujoco_objects.sim->mtx; }
 
@@ -19,73 +20,87 @@ Mujoco::Mujoco()
     /* is_passive = */ false);
 }
 
-mjModel *LoadModel(const char *file, mj::Simulate &sim)
-{
+namespace {
+  constexpr auto MJB_FILE_EXTENSION = ".mjb";
 
-  // this copy is needed so that the mju::strlen call below compiles
-  char filename[mj::Simulate::kMaxFilenameLength];
-  mju::strcpy_arr(filename, file);
+  std::string get_file_extension(std::string const &filename)
+  {
+    auto dot_position = filename.rfind('.');
 
-  // make sure filename is not empty
-  if (!filename[0]) { return nullptr; }
+    if (dot_position != std::string::npos) { return filename.substr(dot_position); }
 
-  // load and compile
-  const int kErrorLength = 1024;
-  char loadError[kErrorLength] = "";
-  mjModel *mnew = 0;
-  if (mju::strlen_arr(filename) > 4
-      && !std::strncmp(
-        filename + mju::strlen_arr(filename) - 4, ".mjb", mju::sizeof_arr(filename) - mju::strlen_arr(filename) + 4)) {
-    mnew = mj_loadModel(filename, nullptr);
-    if (!mnew) { mju::strcpy_arr(loadError, "could not load binary model"); }
-  } else {
-    mnew = mj_loadXML(filename, nullptr, loadError, kErrorLength);
-    // remove trailing newline character from loadError
-    if (loadError[0]) {
-      std::size_t error_length = mju::strlen_arr(loadError);
-      if (loadError[error_length - 1] == '\n') { loadError[error_length - 1] = '\0'; }
+    return {};
+  }
+
+  bool is_empty(char const *msg) { return msg == nullptr || *msg == '\0'; }
+
+  void remove_newline_at_end(char *str)
+  {
+    if (!is_empty(str)) {
+      std::size_t const length = std::strlen(str);
+      if (str[length - 1] == '\n') { str[length - 1] = '\0'; }
     }
   }
 
-  mju::strcpy_arr(sim.load_error, loadError);
+  bool is_mjb_file(std::string const &file) { return get_file_extension(file) == MJB_FILE_EXTENSION; }
 
-  if (!mnew) {
-    std::printf("%s\n", loadError);
-    return nullptr;
+  std::pair<mjModel *, std::string> load_model_from_file(std::string const &file)
+  {
+    if (file.empty()) { return { nullptr, "Provided filename is empty" }; }
+
+    const int max_error_length = 1024;
+    std::unique_ptr<char[]> const load_error{ new char[max_error_length] };// NOLINT
+
+    mjModel *model = is_mjb_file(file) ? mj_loadModel(file.c_str(), nullptr)
+                                       : mj_loadXML(file.c_str(), nullptr, load_error.get(), max_error_length);
+
+    // remove trailing newline character from error message
+    char *error_msg = load_error.get();
+    remove_newline_at_end(error_msg);
+
+    if (model == nullptr and is_mjb_file(file)) { return { nullptr, "Could not load .mjb file" }; }
+    if (model == nullptr) { return { nullptr, error_msg }; }
+    if (!is_empty(error_msg)) { return { model, error_msg }; }
+
+    return { model, "" };
   }
+}// namespace
 
-  // compiler warning: print and pause
-  if (loadError[0]) {
-    // mj_forward() below will print the warning message
-    std::printf("Model compiled, but simulation warning (paused):\n  %s\n", loadError);
-    sim.run = 0;
-  }
-
-  return mnew;
-}
-
-bool Mujoco::load_model(const std::string &model_path)
+bool Mujoco::load_model(const std::string &model_path, LoggerPtr const &logger)
 {
   mujoco_objects.sim->LoadMessage(model_path.c_str());
-  mujoco_objects.m = { LoadModel(model_path.c_str(), *mujoco_objects.sim), mj_deleteModel };
-  if (mujoco_objects.m) {
-    // lock the sim mutex
-    const std::unique_lock<std::recursive_mutex> lock(mujoco_objects.sim->mtx);
+  auto [model, error_msg] = load_model_from_file(model_path);
 
+  if (model == nullptr) {
+    logger->error("Failed to load model: {}", error_msg);
+    return false;
+  }
+
+  if (!error_msg.empty()) {
+    logger->warn("Model compiled, but simulation warning (paused):\n  {}", error_msg);
+    // forward() below will print the warning message
+    gui.pause_simulation();
+  }
+  mujoco_objects.m = { model, mj_deleteModel };
+
+  {
+    const std::unique_lock<std::recursive_mutex> lock(mujoco_objects.sim->mtx);
     mujoco_objects.d = { mj_makeData(mujoco_objects.m.get()), mj_deleteData };
   }
-  if (mujoco_objects.d) {
-    mujoco_objects.sim->Load(mujoco_objects.m.get(), mujoco_objects.d.get(), model_path.c_str());
 
-    // lock the sim mutex
-    const std::unique_lock<std::recursive_mutex> lock(mujoco_objects.sim->mtx);
-
-    mj_forward(mujoco_objects.m.get(), mujoco_objects.d.get());
-
-    simulator.set_ctrl_noise(std::vector<int>(mujoco_objects.m->nu, 0));
-  } else {
+  if (!mujoco_objects.d) {
     mujoco_objects.sim->LoadMessageClear();
+    logger->error("Failed to create mjData object");
+
     return false;
+  }
+
+  mujoco_objects.sim->Load(mujoco_objects.m.get(), mujoco_objects.d.get(), model_path.c_str());
+
+  {
+    const std::unique_lock<std::recursive_mutex> lock(mujoco_objects.sim->mtx);
+    mj_forward(mujoco_objects.m.get(), mujoco_objects.d.get());
+    simulator.set_ctrl_noise(std::vector<double>(mujoco_objects.m->nu, 0));
   }
 
   return true;
@@ -95,7 +110,7 @@ double Mujoco::TimeApi::get_sim_time() const { return mujoco_objects.d->time; }
 
 double Mujoco::TimeApi::get_slowdown_factor() const
 {
-  return static_cast<double>(100 / mujoco_objects.sim->percentRealTime[mujoco_objects.sim->real_time_index]);
+  return static_cast<double>(100 / mujoco_objects.sim->percentRealTime[mujoco_objects.sim->real_time_index]);// NOLINT
 }
 
 bool Mujoco::TimeApi::is_simulation_speed_changed() const { return mujoco_objects.sim->speed_changed; }
@@ -104,13 +119,14 @@ void Mujoco::TimeApi::mark_simulation_speed_as_unchanged() { mujoco_objects.sim-
 
 void Mujoco::TimeApi::mark_simulation_speed_as_changed() { mujoco_objects.sim->speed_changed = true; }
 
-bool Mujoco::TimeApi::is_cpu_and_sim_time_out_of_sync(TimePoint const &cpu_iteration_start, double sim_iteration_start) const
+bool Mujoco::TimeApi::is_cpu_and_sim_time_out_of_sync(TimePoint const &cpu_iteration_start,
+  double sim_iteration_start) const
 {
-  const auto elapsed_cpu = cpu_iteration_start - cpu_sync_time;
-  double elapsed_sim = sim_iteration_start - sim_sync_time;
-  double slowdown = get_slowdown_factor();
+  auto const elapsed_cpu = cpu_iteration_start - cpu_sync_time;
+  double const elapsed_sim = sim_iteration_start - sim_sync_time;
+  double const slowdown = get_slowdown_factor();
 
-  bool misaligned = fabs(Seconds(elapsed_cpu).count() / slowdown - elapsed_sim) > sync_misalign_threshold;
+  bool const misaligned = fabs(Seconds(elapsed_cpu).count() / slowdown - elapsed_sim) > sync_misalign_threshold;
 
   return elapsed_sim < 0 || elapsed_cpu.count() < 0 || cpu_sync_time.time_since_epoch().count() == 0 || misaligned
          || is_simulation_speed_changed();
@@ -118,7 +134,7 @@ bool Mujoco::TimeApi::is_cpu_and_sim_time_out_of_sync(TimePoint const &cpu_itera
 
 bool Mujoco::TimeApi::is_sim_behind_cpu() const
 {
-  return Seconds((get_sim_time() - sim_sync_time)*get_slowdown_factor()) < Clock::now() - cpu_sync_time;
+  return Seconds((get_sim_time() - sim_sync_time) * get_slowdown_factor()) < Clock::now() - cpu_sync_time;
 }
 
 void Mujoco::TimeApi::synchronize_time(TimePoint const &cpu_iteration_start, double sim_iteration_start)
@@ -130,21 +146,19 @@ void Mujoco::TimeApi::synchronize_time(TimePoint const &cpu_iteration_start, dou
 
 bool Mujoco::TimeApi::is_sim_within_refresh_time(TimePoint const &cpu_iteration_start, int refresh_rate) const
 {
-  double refresh_time = sim_refresh_fraction / refresh_rate;
+  double const refresh_time = sim_refresh_fraction / refresh_rate;
   return Clock::now() - cpu_iteration_start < Seconds(refresh_time);
 }
 
 void Mujoco::TimeApi::measure_slowdown_factor(TimePoint const &cpu_iteration_start, double sim_iteration_start)
 {
-  double elapsed_cpu = std::chrono::duration<double>((cpu_iteration_start - cpu_sync_time)).count();
-  double elapsed_sim = sim_iteration_start - sim_sync_time;
+  double const elapsed_cpu = std::chrono::duration<double>((cpu_iteration_start - cpu_sync_time)).count();
+  double const elapsed_sim = sim_iteration_start - sim_sync_time;
 
   // TODO: handle near-zero value here
   if (elapsed_sim == 0) { return; }
 
-  double slowdown = elapsed_cpu / elapsed_sim;
-
-  mujoco_objects.sim->measured_slowdown = slowdown;
+  mujoco_objects.sim->measured_slowdown = static_cast<float>(elapsed_cpu / elapsed_sim);
 }
 
 VectorX Mujoco::State::get_joint_positions() const
@@ -165,8 +179,11 @@ Vector3 Mujoco::State::get_mocap_position(int mocap_id) const
 SO3 Mujoco::State::get_mocap_orientation(int mocap_id) const
 {
   Eigen::Map<Eigen::VectorXd> target_orientation_map(&mujoco_objects.d->mocap_quat[mocap_id], 4);
-  legged_ctrl::Quaternion target_quat{
-    target_orientation_map[0], target_orientation_map[1], target_orientation_map[2], target_orientation_map[3]
+  legged_ctrl::Quaternion const target_quat{ // NOLINT
+    target_orientation_map[0],
+    target_orientation_map[1],
+    target_orientation_map[2],
+    target_orientation_map[3]
   };
 
   return target_quat.matrix();
@@ -174,7 +191,7 @@ SO3 Mujoco::State::get_mocap_orientation(int mocap_id) const
 
 bool Mujoco::Gui::is_simulation_paused() const { return mujoco_objects.sim->run == 0; }
 
-bool Mujoco::Gui::is_exit_requested() const { return mujoco_objects.sim->exitrequest.load(); }
+bool Mujoco::Gui::is_exit_requested() const { return mujoco_objects.sim->exitrequest.load() != 0; }
 
 void Mujoco::Gui::enter_render_loop() { mujoco_objects.sim->RenderLoop(); }
 
@@ -183,6 +200,8 @@ int Mujoco::Gui::refresh_rate() const { return mujoco_objects.sim->refresh_rate;
 void Mujoco::Gui::save_current_state_to_history() { mujoco_objects.sim->AddToHistory(); }
 
 bool Mujoco::Gui::is_ctrl_noise_enabled() const { return mujoco_objects.sim->ctrl_noise_std != 0.; }
+
+void Mujoco::Gui::pause_simulation() { mujoco_objects.sim->run = 0; }
 
 void Mujoco::Simulator::step_simulation() { mj_step(mujoco_objects.m.get(), mujoco_objects.d.get()); }
 
@@ -193,16 +212,13 @@ void Mujoco::Simulator::apply_control_torques(VectorX const &tau, std::vector<in
   std::for_each(actuator_ids.begin(), actuator_ids.end(), [&](int const id) { mujoco_objects.d->ctrl[id] = tau(id); });
 }
 
-void Mujoco::Simulator::set_ctrl_noise(std::vector<int> noise)
-{
-  mujoco_objects.ctrlnoise = std::move(noise);
-}
+void Mujoco::Simulator::set_ctrl_noise(std::vector<double> noise) { mujoco_objects.ctrlnoise = std::move(noise); }
 
 void Mujoco::Simulator::init_ctrl_noise_with_stddev()
 {
   assert(mujoco_objects.ctrlnoise.size() == mujoco_objects.m->nu);
-  mjtNum rate = mju_exp(-mujoco_objects.m->opt.timestep / mju_max(mujoco_objects.sim->ctrl_noise_rate, mjMINVAL));
-  mjtNum scale = mujoco_objects.sim->ctrl_noise_std * mju_sqrt(1-rate*rate);
+  mjtNum const rate = mju_exp(-mujoco_objects.m->opt.timestep / mju_max(mujoco_objects.sim->ctrl_noise_rate, mjMINVAL));
+  mjtNum const scale = mujoco_objects.sim->ctrl_noise_std * mju_sqrt(1 - rate * rate);
 
   for (int i = 0; i < mujoco_objects.m->nu; ++i) {
     // update noise
@@ -250,12 +266,14 @@ int Mujoco::Scene::get_actuator_id(const std::string &name) const
   return get_id(name.data(), mujoco_objects.m->name_actuatoradr, mujoco_objects.m->names, mujoco_objects.m->nu);
 }
 
-std::vector<int> Mujoco::Scene::get_actuator_ids(std::vector<std::string> joint_names) const
+std::vector<int> Mujoco::Scene::get_actuator_ids(std::vector<std::string> const &joint_names) const
 {
-  std::vector<int> actuator_ids;
-  for (const auto &name : joint_names) { actuator_ids.push_back(get_actuator_id(name)); }
-
+  std::vector<int> actuator_ids(joint_names.size());
+  std::transform(joint_names.begin(), joint_names.end(), actuator_ids.begin(), [this](std::string const &name) {
+    return get_actuator_id(name);
+  });
   return actuator_ids;
 }
+// NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-make-member-function-const)
 
 }// namespace task_space_control

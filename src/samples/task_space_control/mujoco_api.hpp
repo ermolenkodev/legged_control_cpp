@@ -17,8 +17,6 @@
 #include <string>
 #include <thread>
 
-#include "mujoco_api.hpp"
-
 #include "array_safety.h"
 #include "glfw_adapter.h"
 #include "legged_control_cpp/forward_dynamics.hpp"
@@ -26,6 +24,7 @@
 #include "legged_control_cpp/jacobian.hpp"
 #include "legged_control_cpp/mjxml/mjxml.hpp"
 #include "legged_control_cpp/model.hpp"
+#include "legged_control_cpp/logging.hpp"
 #include "simulate.h"
 #include <mujoco/mujoco.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -58,7 +57,7 @@ struct LowLevelMujocoObjects
   std::unique_ptr<mj::Simulate> sim{};
   std::unique_ptr<mjModel, decltype(&mj_deleteModel)> m{nullptr, mj_deleteModel};
   std::unique_ptr<mjData, decltype(&mj_deleteData)> d{nullptr, mj_deleteData};
-  std::vector<int> ctrlnoise{};
+  std::vector<double> ctrlnoise{};
 };
 
 class Mujoco
@@ -70,13 +69,13 @@ public:
 
   Mujoco();
 
-  bool load_model(std::string const &model_path);
+  bool load_model(std::string const &model_path, LoggerPtr const &logger = null_logger());
   std::recursive_mutex& mutex() const;
 
   class TimeApi
   {
   public:
-    TimeApi(LowLevelMujocoObjects &mujoco_objects) : mujoco_objects(mujoco_objects) {}
+    explicit TimeApi(LowLevelMujocoObjects &mujoco_objects) : mujoco_objects(mujoco_objects) {}
     double get_sim_time() const;
     double get_slowdown_factor() const;
     bool is_simulation_speed_changed() const;
@@ -98,7 +97,7 @@ public:
   class State
   {
   public:
-    State(LowLevelMujocoObjects &mujoco_objects) : mujoco_objects(mujoco_objects) {}
+    explicit State(LowLevelMujocoObjects &mujoco_objects) : mujoco_objects(mujoco_objects) {}
     VectorX get_joint_positions() const;
     VectorX get_joint_velocities() const;
     Vector3 get_mocap_position(int mocap_id) const;
@@ -110,13 +109,14 @@ public:
   class Gui
   {
   public:
-    Gui(LowLevelMujocoObjects &mujoco_objects) : mujoco_objects(mujoco_objects) {}
+    explicit Gui(LowLevelMujocoObjects &mujoco_objects) : mujoco_objects(mujoco_objects) {}
     bool is_simulation_paused() const;
     bool is_exit_requested() const;
     void enter_render_loop();
     int refresh_rate() const;
     void save_current_state_to_history();
     bool is_ctrl_noise_enabled() const;
+    void pause_simulation();
   private:
     LowLevelMujocoObjects &mujoco_objects;
   };
@@ -124,11 +124,11 @@ public:
   class Simulator
   {
   public:
-    Simulator(LowLevelMujocoObjects &mujoco_objects) : mujoco_objects(mujoco_objects) {}
+    explicit Simulator(LowLevelMujocoObjects &mujoco_objects) : mujoco_objects(mujoco_objects) {}
     void step_simulation();
     void forward();
     void apply_control_torques(const VectorX &tau, const std::vector<int> &actuator_ids);
-    void set_ctrl_noise(std::vector<int> noise);
+    void set_ctrl_noise(std::vector<double> noise);
     void init_ctrl_noise_with_stddev();
   private:
     LowLevelMujocoObjects &mujoco_objects;
@@ -137,13 +137,13 @@ public:
   class Scene
   {
   public:
-    Scene(LowLevelMujocoObjects &mujoco_objects) : mujoco_objects(mujoco_objects) {}
+    explicit Scene(LowLevelMujocoObjects &mujoco_objects) : mujoco_objects(mujoco_objects) {}
     int get_mocap_id(std::string const &name) const;
-    int get_site_id(std::string const &name) const;
+    [[nodiscard]] int get_site_id(std::string const &name) const;
     void set_state_from_keyframe(std::string const &keyframe_name);
 
     int get_actuator_id(std::string const &name) const;
-    std::vector<int> get_actuator_ids(std::vector<std::string> joint_names) const;
+    std::vector<int> get_actuator_ids(std::vector<std::string> const &joint_names) const;
   private:
     LowLevelMujocoObjects &mujoco_objects;
   };
