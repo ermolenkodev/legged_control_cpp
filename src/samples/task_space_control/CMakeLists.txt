@@ -1,6 +1,6 @@
 include(GenerateExportHeader)
 
-add_executable(task_space_control EXCLUDE_FROM_ALL mujoco_api.cpp task_space_control.cpp)
+add_executable(task_space_control mujoco_api.cpp task_space_control.cpp)
 
 target_compile_definitions(task_space_control PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../../../assets")
 
