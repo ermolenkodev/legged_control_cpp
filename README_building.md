@@ -98,10 +98,6 @@ Instead, if you have CMake version 3.21+, you can use one of the configuration p
     cmake . --preset <configure-preset>
     cmake --build
 
-`task_space_control` target is excluded from `all` so it needs to be built separately. For example:
-
-	cmake --build ./build --target task_space_control
-
 #### (2.b) Configuring via ccmake:
 
 With the Cmake Curses Dialog Command Line tool:
