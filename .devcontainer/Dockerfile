@@ -84,9 +84,14 @@ RUN git clone https://github.com/ros/urdfdom_headers && \
     make && \
     make install
 
-RUN export DEBIAN_FRONTEND=noninteractive && \
-    apt-get install -y --no-install-recommends \
-        libtinyxml2-dev
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get install -y --no-install-recommends \
+    mesa-common-dev \
+    libxinerama-dev \
+    libxcursor-dev  \
+    libxrandr-dev  \
+    libxi-dev  \
+    libtinyxml2-dev
+
 
 RUN git clone https://github.com/ros/urdfdom.git && \
     cd urdfdom && \
