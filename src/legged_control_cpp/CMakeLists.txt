@@ -2,10 +2,10 @@ include(GenerateExportHeader)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake")
 
-find_package(urdfdom REQUIRED)
 find_package(TinyXML2 REQUIRED)
+find_package(urdfdom REQUIRED)
 
-add_library(legged_control_lib builder.cpp model.cpp urdf.cpp spatial.cpp inverse_dynamics.cpp logging.cpp external_forces.cpp
+add_library(legged_control_lib STATIC builder.cpp model.cpp urdf.cpp spatial.cpp inverse_dynamics.cpp logging.cpp external_forces.cpp
             forward_dynamics.cpp jacobian.cpp mjxml/mjxml.cpp mjxml/mjxml_defaults.cpp mjxml/mjxml_utils.cpp mjxml/mjxml_builder.cpp forward_kinematics.cpp utilities.cpp)
 
 add_library(legged_control_cpp::legged_control_lib ALIAS legged_control_lib)
@@ -26,6 +26,8 @@ target_include_directories(legged_control_lib ${WARNING_GUARD} SYSTEM PUBLIC
 target_include_directories(legged_control_lib SYSTEM PUBLIC ${urdfdom_INCLUDE_DIRS})
 
 target_include_directories(legged_control_lib SYSTEM PUBLIC ${spdlog_INCLUDE_DIRS})
+
+target_include_directories(legged_control_lib SYSTEM PUBLIC ${TinyXML2_INCLUDE_DIRS})
 
 target_link_system_libraries(
         legged_control_lib
