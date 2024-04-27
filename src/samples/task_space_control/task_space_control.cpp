@@ -117,7 +117,7 @@ void simulation_and_control_loop(Mujoco &mujoco, std::string const &scene_path, 
 int main()
 {
   auto mujoco = Mujoco();
-  MultibodyModel model = legged_ctrl::mjxml::parse_mujoco_xml(std::string(ASSETS_PATH) + "/scene/iiwa14.xml");
+  MultibodyModel const model = legged_ctrl::mjxml::parse_mujoco_xml(std::string(ASSETS_PATH) + "/scene/iiwa14.xml");
 
   std::thread simulation_thread(
     &simulation_and_control_loop, std::ref(mujoco), std::string(ASSETS_PATH) + "/scene/scene.xml", model);
