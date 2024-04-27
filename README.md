@@ -7,6 +7,9 @@
 The project is a ground-up implementation of Rigid Body Dynamics and high-level control algorithms for robotics manipulators and legged robots.
 The primary goal is to develop all these algorithms from scratch (possibly excluding the QP solver), and to do so without utilizing any external robotics libraries, such as Pinocchio, Drake, etc.
 
+### Task space control demo
+https://github.com/ermolenkodev/legged_control_cpp/assets/26741087/ad6790a7-bafb-4df7-8795-f46ae2a196d6
+
 ## Planned features
 - [x] Model of kinematic tree
 - [x] Basic URDF parsing
