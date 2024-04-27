@@ -10,6 +10,7 @@ The primary goal is to develop all these algorithms from scratch (possibly exclu
 ## Planned features
 - [x] Model of kinematic tree
 - [x] Basic URDF parsing
+- [x] Basic Mjxml parsing
 - [x] Simple visualization
 - [ ] Rigid Body Dynamics
   - [x] Recursive Newton-Euler Algorithm
@@ -22,7 +23,9 @@ The primary goal is to develop all these algorithms from scratch (possibly exclu
     - [x] PD Control with Gravity Compensation
     - [x] Feedforward Control
     - [x] Inverse Dynamics Control
-  - [ ] Operational Space Control
+  - [ ] Task Space Control
+    - [x] Integration with Mujoco
+    - [x] Simple PD Control in Task Space
   - [ ] Contact consistent dynamics
 - [ ] Legged Robot Control
   - [ ] Simulation of legged robot
@@ -32,16 +35,19 @@ The primary goal is to develop all these algorithms from scratch (possibly exclu
 The Rigid Body Dynamics implementation is encapsulated in the [legged_control_lib](src/legged_control_cpp) library. This library is linked to various executable examples located in the samples directory.
 > **Note:**
 > And executables should be run from the project's root directory.
-> By default executables are located in the corresponding build directory.
+> By default executables are located in the corresponding build directory. (e.g. `build/src/samples/urdf_sample/urdf_sample`)
 ### Samples
 #### URDF parsing sample
 `urdf_sample`: A simple example demonstrating how to parse a URDF file.
 #### Joint Space contol sample
 `joint_space_control`: This is an implementation of joint space control tailored for a UR-5 manipulator. It generates an output file named `joint_space_control.log` in the project's root directory. This file contains the simulated joint trajectory and can be visualized using the [rviz trajectory visualizer](https://github.com/ermolenkodev/rviz_trajectory_player)
-
+#### Task Space control sample
+`task_space_control`: This is an implementation of task space control for a IIWA14 manipulator. In this example, Mujoco sim is used for simulation, while legged_control_lib is employed for dynamics computation and control.
+The Mujoco model of the IIWA14 manipulator has been adapted by me from the [mjctrl](https://github.com/kevinzakka/mjctrl) repository, with some modifications applied.
+Additionally, a custom mjxml parser is used to translate the Mujoco model into the internal model class of legged_control_lib.
 
 ## Visualization
-The project uses [rviz trajectory visualizer](https://github.com/ermolenkodev/rviz_trajectory_player) for visualization.
+The joint_space_control sample uses [rviz trajectory visualizer](https://github.com/ermolenkodev/rviz_trajectory_player) for visualization.
 The visualizer is a ROS package that plays back a trajectory of a robot in rviz.
 For installation instructions, please refer to the projects' [repository](https://github.com/ermolenkodev/rviz_trajectory_player).
 

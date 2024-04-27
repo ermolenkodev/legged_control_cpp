@@ -192,6 +192,8 @@ The following compilers should work:
 
 
 ## Dependencies
+
+### Ubuntu
 Primarily, the library dependencies for this project are handled by CPM.cmake.
 Nonetheless, there are a few dependencies that require manual installation.
 Below, you will find the instructions for manually installing these dependencies specifically for Ubuntu systems.
@@ -214,4 +216,12 @@ build_and_install urdfdom_headers
 apt-get update && apt-get install -y --no-install-recommends libtinyxml2-dev
 build_and_install urdfdom
 ```
-Currently, installation instructions for Windows and macOS are not available. We recommend using the Docker image provided. Alternatively, you could attempt to install the application using the respective package managers for these platforms, or choose to build directly from the source.
+
+### Mac OS
+```bash
+brew install urdfdom
+brew install tinyxml2
+```
+
+### Windows
+Currently, installation instructions for Windows are not available. We recommend using the Docker image provided. Alternatively, you could attempt to install the application using the respective package managers for the platform, or choose to build directly from the source.
