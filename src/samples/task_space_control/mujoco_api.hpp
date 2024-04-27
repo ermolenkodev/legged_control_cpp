@@ -29,19 +29,6 @@
 #include <mujoco/mujoco.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
-#define MUJOCO_PLUGIN_DIR "mujoco_plugin"
-
-extern "C" {
-#if defined(_WIN32) || defined(__CYGWIN__)
-#include <windows.h>
-#else
-#if defined(__APPLE__)
-#include <mach-o/dyld.h>
-#endif
-#include <sys/errno.h>
-#include <unistd.h>
-#endif
-}
 
 namespace task_space_control {
 
