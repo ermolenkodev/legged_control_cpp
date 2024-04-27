@@ -1,9 +1,9 @@
 #include "legged_control_cpp/mjxml/mjxml_builder.hpp"
 
-#include <utility>
 #include "legged_control_cpp/utilities.hpp"
 #include "mjxml_defaults.hpp"
 #include "mjxml_utils.hpp"
+#include <utility>
 
 namespace legged_ctrl::mjxml {
 
@@ -95,7 +95,7 @@ MjxmlMultibodyModelBuilder &MjxmlMultibodyModelBuilder::add_link(tinyxml2::XMLEl
 RevoluteJoint MjxmlMultibodyModelBuilder::process_joint(const std::string &inherited_class,
   const tinyxml2::XMLElement *joint_xml)
 {
-  std::string const class_attribute = get_attribute(joint_xml, CLASS, AttributeValue { inherited_class });
+  std::string const class_attribute = get_attribute(joint_xml, CLASS, AttributeValue{ inherited_class });
   std::unordered_map<std::string, std::string> const defaults = get_attributes("joint", class_attribute);
   std::string const type_attribute = get_attribute(joint_xml, TYPE, defaults, DEFAULT_JOINT);
 
@@ -111,7 +111,7 @@ RevoluteJoint MjxmlMultibodyModelBuilder::process_joint(const std::string &inher
 SpatialMatrix MjxmlMultibodyModelBuilder::process_inertia(const std::string &inherited_class,
   const tinyxml2::XMLElement *inertial)
 {
-  std::string const inertial_class = get_attribute(inertial, CLASS, AttributeValue { inherited_class });
+  std::string const inertial_class = get_attribute(inertial, CLASS, AttributeValue{ inherited_class });
   std::unordered_map<std::string, std::string> const defaults = get_attributes("inertial", inertial_class);
 
   Vector3 const i_P_C = parse_vector3(get_attribute(inertial, POS, defaults, DEFAULT_POS));

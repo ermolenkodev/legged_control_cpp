@@ -8,7 +8,8 @@
 
 namespace legged_ctrl::mjxml {
 
-MultibodyModel parse_mujoco_xml(std::string const &filename, std::optional<spdlog::logger> const &logger_opt = std::nullopt);
+MultibodyModel parse_mujoco_xml(std::string const &filename,
+  std::optional<spdlog::logger> const &logger_opt = std::nullopt);
 
 struct DummyModelElement
 {
@@ -27,11 +28,12 @@ class ModelElementClass
 public:
   bool contains(std::string const &element_name);
 
-  DummyModelElement& at(std::string const &element_name);
+  DummyModelElement &at(std::string const &element_name);
 
   void insert(std::string const &element_name, DummyModelElement const &element);
 
   void upsert(std::string const &element_name, DummyModelElement const &element);
+
 private:
   std::unordered_map<std::string, DummyModelElement> elements{};
 };

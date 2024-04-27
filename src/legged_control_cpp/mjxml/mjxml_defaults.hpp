@@ -1,13 +1,13 @@
 #ifndef LCC_MJXML_DEFAULTS_HPP
 #define LCC_MJXML_DEFAULTS_HPP
 
+#include "legged_control_cpp/mjxml/mjxml.hpp"
 #include <memory>
 #include <string>
 #include <tinyxml2.h>
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include "legged_control_cpp/mjxml/mjxml.hpp"
 
 namespace legged_ctrl::mjxml {
 
@@ -36,6 +36,6 @@ namespace details {
   std::unordered_map<std::string, ModelElementClass> traverse_defaults_tree(Default::DefaultPtr const &root);
 }// namespace details
 
-}// namespace legged_ctrl::mjxml::details
+}// namespace legged_ctrl::mjxml
 
 #endif

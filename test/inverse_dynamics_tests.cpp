@@ -2,8 +2,8 @@
 
 #include "legged_control_cpp/inverse_dynamics.hpp"
 #include "legged_control_cpp/model.hpp"
-#include "test_data/inverse_dynamics_test_data.hpp"
 #include "test_data/bundled_models.hpp"
+#include "test_data/inverse_dynamics_test_data.hpp"
 
 using namespace legged_ctrl;
 

@@ -42,12 +42,12 @@ struct RNEAExtendedOutput
 RNEAExtendedOutput rnea_with_extended_output(MultibodyModel const &model,
   SystemConfiguration const &systemConfiguration,
   ExternalForces const &externalForces = ExternalForces::none(),
-  Vector3 const &gravity = Vector3 { 0, 0, G });
+  Vector3 const &gravity = Vector3{ 0, 0, G });
 
 VectorX rnea(MultibodyModel const &model,
   SystemConfiguration const &systemConfiguration,
   ExternalForces const &externalForces = ExternalForces::none(),
-  Vector3 const &gravity = Vector3 { 0, 0, G });
+  Vector3 const &gravity = Vector3{ 0, 0, G });
 
 namespace details {
   RNEAExtendedOutput rnea_with_extended_output(MultibodyModel const &model,
@@ -56,7 +56,7 @@ namespace details {
     VectorX const &qdd,
     bool skipCoriolisEffects,
     ExternalForces const &externalForces,
-    Vector3 const &gravity = Vector3 { 0, 0, G });
+    Vector3 const &gravity = Vector3{ 0, 0, G });
 }
 
 }// namespace legged_ctrl

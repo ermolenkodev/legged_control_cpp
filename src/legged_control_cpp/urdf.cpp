@@ -1,7 +1,7 @@
 #include "legged_control_cpp/urdf.hpp"
+#include "legged_control_cpp/builder.hpp"
 #include "queue"
 #include "spdlog/sinks/stdout_color_sinks.h"
-#include "legged_control_cpp/builder.hpp"
 
 namespace legged_ctrl::urdf_parser {
 

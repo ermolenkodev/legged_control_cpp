@@ -1,6 +1,6 @@
 #include "mjxml_defaults.hpp"
-#include <tinyxml2.h>
 #include <stack>
+#include <tinyxml2.h>
 
 namespace legged_ctrl::mjxml::details {
 
@@ -24,7 +24,8 @@ Default::DefaultPtr construct_defaults_tree(tinyxml2::XMLElement const *top_leve
     stk.pop();
 
     class_attribute = current_xml->Attribute("class");
-    auto child_node = class_attribute != nullptr ? std::make_unique<Default>(class_attribute) : std::make_unique<Default>();
+    auto child_node =
+      class_attribute != nullptr ? std::make_unique<Default>(class_attribute) : std::make_unique<Default>();
 
     for (auto const *child = current_xml->FirstChildElement(); child != nullptr; child = child->NextSiblingElement()) {
       if (std::string_view(child->Name()) == "default") {
@@ -52,9 +53,7 @@ std::unordered_map<std::string, ModelElementClass> traverse_defaults_tree(Defaul
     Default const *node = stk.top();
     stk.pop();
 
-    for (auto const &[tag, element] : node->elements) {
-      model_elements[node->class_name].upsert(tag, element);
-    }
+    for (auto const &[tag, element] : node->elements) { model_elements[node->class_name].upsert(tag, element); }
 
     for (auto const &child : node->children) {
       model_elements[child->class_name] = model_elements[node->class_name];

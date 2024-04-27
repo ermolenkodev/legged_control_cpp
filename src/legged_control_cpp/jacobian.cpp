@@ -4,7 +4,9 @@
 namespace legged_ctrl {
 
 LCC_DISABLE_SIGN_CONVERSION
-JacobianMatrix compute_end_effector_frame_jacobian(MultibodyModel const &model, VectorX const &q, ReferenceFrame const reference_frame)
+JacobianMatrix compute_end_effector_frame_jacobian(MultibodyModel const &model,
+  VectorX const &q,
+  ReferenceFrame const reference_frame)
 {
   auto const &[name, n_bodies, joints, parent, X_tree, I, _] = model;
   JacobianMatrix J = JacobianMatrix::Zero(SIX_DIM, n_bodies);
