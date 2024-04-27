@@ -19,6 +19,7 @@ if(TinyXML2_FOUND)
       message(FATAL_ERROR "Unable to determine target for TinyXML2")
     endif()
     list(APPEND TinyXML2_TARGETS ${TINYXML2_LIBRARY})
+    find_path(TINYXML2_INCLUDE_DIR NAMES tinyxml2.h)
   else()
     # Only perform that logic once
     if(NOT TARGET tinyxml2::tinyxml2)
