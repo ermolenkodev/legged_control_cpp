@@ -66,9 +66,10 @@ jobs:
           #            enable_ipo: Off
 
           # Set up preferred package generators, for given build configurations
-          - build_type: Release
-            package_maintainer_mode: OFF
-            package_generator: TBZ2
+          # TODO configure CPack properly currently it tries to package Mujoco libs but it is infeasible to build them on the CI
+#          - build_type: Release
+#            package_maintainer_mode: OFF
+#            package_generator: TBZ2
 
           # This exists solely to make sure a non-multiconfig build works
           - os: ubuntu-20.04
