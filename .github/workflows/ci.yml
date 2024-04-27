@@ -189,7 +189,7 @@ jobs:
       - name: Build
         # Execute the build.  You can specify a specific target with "--target <NAME>"
         run: |
-          cmake --build ./build --config ${{matrix.build_type}}
+          cmake --build ./build --config ${{matrix.build_type}} --target legged_control_lib
 
       - name: Unix - Test and coverage
         if: runner.os != 'Windows'
