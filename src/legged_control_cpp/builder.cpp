@@ -76,11 +76,8 @@ SE3 convert_from_urdf(::urdf::Pose const &pose)
 }
 
 namespace {
-  std::array<double, 3> convert_to_array(::urdf::Vector3 const &vec)
-  {
-    return { vec.x, vec.y, vec.z };
-  }
-}
+  std::array<double, 3> convert_to_array(::urdf::Vector3 const &vec) { return { vec.x, vec.y, vec.z }; }
+}// namespace
 
 MultibodyModelBuilder &MultibodyModelBuilder::add_link(::urdf::LinkConstSharedPtr const &link)
 {

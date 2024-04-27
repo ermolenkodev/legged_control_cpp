@@ -25,6 +25,7 @@ public:
 
   MjxmlMultibodyModelBuilder &set_logger(spdlog::logger logger) override;
   MjxmlMultibodyModelBuilder &set_defaults(tinyxml2::XMLElement const *defaults_xml);
+
 private:
   std::unordered_map<std::string, ModelElementClass> model_elements_classes;
 

@@ -7,7 +7,8 @@
 
 namespace legged_ctrl {
 
-struct CRBAResult {
+struct CRBAResult
+{
   JointSpaceMatrix mass_matrix_;
   VectorX nle_;
 
@@ -22,7 +23,7 @@ JointSpaceMatrix compute_mass_matrix_crba(MultibodyModel const &model,
 CRBAResult crba(MultibodyModel const &model,
   SystemConfiguration const &system_configuration,
   ExternalForces const &external_forces = ExternalForces::none(),
-  Vector3 const &gravity = Vector3 { 0, 0, G });
+  Vector3 const &gravity = Vector3{ 0, 0, G });
 
 std::vector<SpatialMatrix> compute_composite_inertia(const MultibodyModel &model,
   const std::vector<SpatialMatrix> &Xup);
@@ -30,7 +31,7 @@ std::vector<SpatialMatrix> compute_composite_inertia(const MultibodyModel &model
 VectorX compute_gravity_effect(MultibodyModel const &model,
   SystemConfiguration const &system_configuration,
   ExternalForces const &external_forces = ExternalForces::none(),
-  Vector3 const &gravity = Vector3 { 0, 0, G });
+  Vector3 const &gravity = Vector3{ 0, 0, G });
 
 }// namespace legged_ctrl
 

@@ -1,6 +1,6 @@
-#include <catch2/catch_test_macros.hpp>
 #include "legged_control_cpp/model.hpp"
 #include "test_data/bundled_models.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("IIWA14 mjxml parsing", "[model_parsing]")
 {

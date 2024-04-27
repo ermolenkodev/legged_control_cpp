@@ -13,7 +13,7 @@ target_include_directories(
 
 find_package(Threads REQUIRED)
 
-if(NOT TARGET mujoco::mujoco)
+if (NOT TARGET mujoco::mujoco)
     CPMAddPackage(
             NAME mujoco
             GIT_TAG 3.1.2
@@ -25,7 +25,7 @@ if(NOT TARGET mujoco::mujoco)
             "MUJOCO_TEST_PYTHON_UTIL OFF"
             "SDFLIB_USE_SYSTEM_SPDLOG ON"
             "SIMULATE_BUILD_EXECUTABLE OFF")
-endif()
+endif ()
 
 target_link_system_libraries(
         task_space_control

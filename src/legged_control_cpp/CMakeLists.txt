@@ -6,7 +6,7 @@ find_package(TinyXML2 REQUIRED)
 find_package(urdfdom REQUIRED)
 
 add_library(legged_control_lib STATIC builder.cpp model.cpp urdf.cpp spatial.cpp inverse_dynamics.cpp logging.cpp external_forces.cpp
-            forward_dynamics.cpp jacobian.cpp mjxml/mjxml.cpp mjxml/mjxml_defaults.cpp mjxml/mjxml_utils.cpp mjxml/mjxml_builder.cpp forward_kinematics.cpp utilities.cpp)
+        forward_dynamics.cpp jacobian.cpp mjxml/mjxml.cpp mjxml/mjxml_defaults.cpp mjxml/mjxml_utils.cpp mjxml/mjxml_builder.cpp forward_kinematics.cpp utilities.cpp)
 
 add_library(legged_control_cpp::legged_control_lib ALIAS legged_control_lib)
 

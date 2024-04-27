@@ -39,7 +39,7 @@ MultibodyModel parse_mujoco_xml(std::string const &filename, std::optional<spdlo
 
 void process_all_links(MjxmlMultibodyModelBuilder &builder, tinyxml2::XMLElement const *root_link)
 {
-  std::string const childclass = details::get_attribute(root_link, CHILDCLASS, AttributeValue { "main" });
+  std::string const childclass = details::get_attribute(root_link, CHILDCLASS, AttributeValue{ "main" });
 
   using LinkParentClass = std::tuple<tinyxml2::XMLElement const *, tinyxml2::XMLElement const *, std::string>;
   std::queue<LinkParentClass> link_queue;
@@ -54,7 +54,7 @@ void process_all_links(MjxmlMultibodyModelBuilder &builder, tinyxml2::XMLElement
 
     for (auto const *child = link->FirstChildElement("body"); child != nullptr;
          child = child->NextSiblingElement("body")) {
-      link_queue.emplace(child, link, details::get_attribute(link, CHILDCLASS, AttributeValue { inherited_class }));
+      link_queue.emplace(child, link, details::get_attribute(link, CHILDCLASS, AttributeValue{ inherited_class }));
     }
 
     builder.add_link(link, parent, inherited_class);

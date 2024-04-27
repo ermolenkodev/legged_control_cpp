@@ -1,9 +1,9 @@
 #ifndef LCC_JACOBIAN_H
 #define LCC_JACOBIAN_H
 
-#include "type_aliases.hpp"
 #include "model.hpp"
 #include "refernce_frame.hpp"
+#include "type_aliases.hpp"
 
 namespace legged_ctrl {
 

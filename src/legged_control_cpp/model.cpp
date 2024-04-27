@@ -7,7 +7,10 @@ namespace legged_ctrl {
 
 MultibodyModelBuilderWithoutRoot MultibodyModel::create_from_urdf() { return MultibodyModelBuilderWithoutRoot{}; }
 
-mjxml::MjxmlModelBuilderWithoutRoot MultibodyModel::create_from_mjxml() { return mjxml::MjxmlModelBuilderWithoutRoot{}; }
+mjxml::MjxmlModelBuilderWithoutRoot MultibodyModel::create_from_mjxml()
+{
+  return mjxml::MjxmlModelBuilderWithoutRoot{};
+}
 
 std::ostream &operator<<(std::ostream &os, MultibodyModel const &model)
 {

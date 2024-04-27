@@ -2,7 +2,7 @@ name: ci
 on:
   pull_request:
   release:
-    types: [published]
+    types: [ published ]
   push:
     tags:
     branches:
@@ -29,8 +29,8 @@ jobs:
       matrix:
         os:
           - ubuntu-20.04
-#          - macos-11
-#          - windows-2019
+        #          - macos-11
+        #          - windows-2019
         compiler:
           # you can specify the version after `-` like "llvm-15.0.2".
           - llvm-15.0.2
@@ -62,8 +62,8 @@ jobs:
             enable_ipo: Off
             gcov_executable: "llvm-cov gcov"
 
-#          - os: macos-11
-#            enable_ipo: Off
+          #          - os: macos-11
+          #            enable_ipo: Off
 
           # Set up preferred package generators, for given build configurations
           - build_type: Release
@@ -80,40 +80,40 @@ jobs:
             enable_ipo: Off
 
           # Windows msvc builds
-#          - os: windows-2022
-#            compiler: msvc
-#            generator: "Visual Studio 17 2022"
-#            build_type: Debug
-#            package_maintainer_mode: On
-#            enable_ipo: On
-#
-#          - os: windows-2022
-#            compiler: msvc
-#            generator: "Visual Studio 17 2022"
-#            build_type: Release
-#            package_maintainer_mode: On
-#            enable_ipo: On
-#
-#          - os: windows-2022
-#            compiler: msvc
-#            generator: "Visual Studio 17 2022"
-#            build_type: Debug
-#            package_maintainer_mode: Off
-#
-#          - os: windows-2022
-#            compiler: msvc
-#            generator: "Visual Studio 17 2022"
-#            build_type: Release
-#            package_maintainer_mode: Off
-#            package_generator: ZIP
-#
-#          - os: windows-2022
-#            compiler: msvc
-#            generator: "Visual Studio 17 2022"
-#            build_type: Release
-#            package_maintainer_mode: On
-#            enable_ipo: On
-#            build_shared: On
+    #          - os: windows-2022
+    #            compiler: msvc
+    #            generator: "Visual Studio 17 2022"
+    #            build_type: Debug
+    #            package_maintainer_mode: On
+    #            enable_ipo: On
+    #
+    #          - os: windows-2022
+    #            compiler: msvc
+    #            generator: "Visual Studio 17 2022"
+    #            build_type: Release
+    #            package_maintainer_mode: On
+    #            enable_ipo: On
+    #
+    #          - os: windows-2022
+    #            compiler: msvc
+    #            generator: "Visual Studio 17 2022"
+    #            build_type: Debug
+    #            package_maintainer_mode: Off
+    #
+    #          - os: windows-2022
+    #            compiler: msvc
+    #            generator: "Visual Studio 17 2022"
+    #            build_type: Release
+    #            package_maintainer_mode: Off
+    #            package_generator: ZIP
+    #
+    #          - os: windows-2022
+    #            compiler: msvc
+    #            generator: "Visual Studio 17 2022"
+    #            build_type: Release
+    #            package_maintainer_mode: On
+    #            enable_ipo: On
+    #            build_shared: On
 
 
     steps:
