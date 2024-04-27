@@ -9,7 +9,13 @@ function(legged_control_cpp_setup_dependencies)
   # already been provided to us by a parent project
 
   if(NOT TARGET fmtlib::fmtlib)
-    CPMAddPackage("gh:fmtlib/fmt#9.1.0")
+    CPMAddPackage(
+            NAME fmt
+            GIT_TAG 9.1.0
+            GITHUB_REPOSITORY "fmtlib/fmt"
+            OPTIONS
+            "BUILD_SHARED_LIBS ON"
+    )
   endif()
 
   if(NOT TARGET spdlog::spdlog)
@@ -21,7 +27,9 @@ function(legged_control_cpp_setup_dependencies)
       GITHUB_REPOSITORY
       "gabime/spdlog"
       OPTIONS
-      "SPDLOG_FMT_EXTERNAL ON")
+      "SPDLOG_FMT_EXTERNAL ON"
+      "SPDLOG_BUILD_SHARED ON"
+    )
   endif()
 
   if(NOT TARGET Catch2::Catch2WithMain)
