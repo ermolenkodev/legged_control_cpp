@@ -76,9 +76,16 @@ jobs:
           gcovr: false
           opencppcoverage: false
 
-      - name: Install urdfdom
+      - name: Install deps
+        if: runner.os != 'Windows'
         run: |
-          sudo apt-get update && sudo apt-get install -y liburdfdom-dev
+          if [ "${{ runner.os }}" == "Linux" ]; then
+            sudo apt-get update && sudo apt-get install -y liburdfdom-dev libtinyxml2-dev && 
+              sudo apt-get install -y libxinerama-dev libxcursor-dev libxrandr-dev libxi-dev libgl-dev
+          elif [ "${{ runner.os }}" == "macOS" ]; then
+            brew install urdfdom
+            brew install tinyxml2
+          fi
 
         # make sure coverage is only enabled for Debug builds, since it sets -O0 to make sure coverage
         # has meaningful results
@@ -100,7 +107,7 @@ jobs:
       - name: Build
         # Execute the build.  You can specify a specific target with "--target <NAME>"
         run: |
-          cmake --build ./build --config ${{matrix.build_type}}
+          cmake --build ./build --config ${{matrix.build_type}} --target legged_control_lib constexpr_tests relaxed_constexpr_tests inverse_dynamics_tests mjxml_parsing_tests urdf_sample joint_space_control
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
