@@ -20,7 +20,8 @@ endif ()
 include(${Catch2_SOURCE_DIR}/extras/Catch.cmake)
 
 # Add a file containing a set of constexpr tests
-add_executable(constexpr_tests constexpr_tests.cpp)
+add_executable(constexpr_tests constexpr_tests.cpp
+        forward_kinematics_tests.cpp)
 target_link_system_libraries(
         constexpr_tests
         PRIVATE
@@ -135,5 +136,39 @@ catch_discover_tests(
         .
         OUTPUT_PREFIX
         "mjxml_parsing."
+        OUTPUT_SUFFIX
+        .xml)
+
+
+add_executable(forward_kinematics_tests forward_kinematics_tests.cpp)
+target_link_system_libraries(
+        forward_kinematics_tests
+        PRIVATE
+        spdlog::spdlog)
+
+target_link_libraries(
+        forward_kinematics_tests
+        PRIVATE legged_control_cpp::legged_control_cpp_warnings
+        legged_control_cpp::legged_control_cpp_options
+        legged_control_cpp::legged_control_lib
+        Catch2::Catch2WithMain)
+
+target_include_directories(
+        forward_kinematics_tests
+        PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/test_data)
+
+target_compile_definitions(forward_kinematics_tests PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../assets")
+
+catch_discover_tests(
+        forward_kinematics_tests
+        TEST_PREFIX
+        "forward_kinematics."
+        REPORTER
+        XML
+        OUTPUT_DIR
+        .
+        OUTPUT_PREFIX
+        "forward_kinematics."
         OUTPUT_SUFFIX
         .xml)

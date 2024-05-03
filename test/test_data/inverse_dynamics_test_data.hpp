@@ -1,3 +1,6 @@
+#ifndef LCC_INVERSE_DYNAMICS_TEST_DATA_HPP
+#define LCC_INVERSE_DYNAMICS_TEST_DATA_HPP
+
 #include "legged_control_cpp/type_aliases.hpp"
 #include <Eigen/src/Core/Matrix.h>
 #include <vector>
@@ -7,6 +10,7 @@ static const double PRECISION = 1e-3;
 using namespace legged_ctrl;
 
 namespace helpers {
+
 VectorX q(std::vector<double> const &v) { return Eigen::VectorXd::Map(v.data(), static_cast<long>(v.size())); }
 
 VectorX qd(std::vector<double> const &v) { return q(v); }
@@ -14,6 +18,7 @@ VectorX qd(std::vector<double> const &v) { return q(v); }
 VectorX qdd(std::vector<double> const &v) { return q(v); }
 
 VectorX tau(std::vector<double> const &v) { return q(v); }
+
 }// namespace helpers
 
 // NOLINTBEGIN
@@ -3523,3 +3528,5 @@ std::vector<std::tuple<SystemConfiguration, ExternalForces, VectorX>> iiwa_rnea_
   };
 }
 // NOLINTEND
+
+#endif
