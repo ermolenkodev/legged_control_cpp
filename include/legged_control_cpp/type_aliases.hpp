@@ -33,6 +33,7 @@ using JointSpaceMatrix = Eigen::MatrixXd;
 using JacobianMatrix = Eigen::MatrixXd;
 using IndexedSpatialMatrices = std::unordered_map<int, SpatialMatrix>;
 using DiagonalMatrix = Eigen::DiagonalMatrix<double, Eigen::Dynamic>;
+using MatrixX = Eigen::MatrixXd;
 
 }// namespace legged_ctrl
 
