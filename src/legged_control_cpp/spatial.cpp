@@ -115,4 +115,10 @@ std::pair<double, Vector3> angle_axis_from_SO3(SO3 const &R)
   return { delta_theta, r_hat };
 }
 
+MatrixX eye(int n)
+{
+  MatrixX I = MatrixX::Identity(n, n);
+  return I;
+}
+
 }// namespace legged_ctrl
