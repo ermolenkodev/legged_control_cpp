@@ -2,6 +2,7 @@
 #define LCC_FORWARD_KINEMATICS_HPP
 
 #include "model.hpp"
+#include "refernce_frame.hpp"
 #include "type_aliases.hpp"
 
 namespace legged_ctrl {
@@ -19,6 +20,21 @@ struct Placement
 };
 
 Placement compute_end_effector_placement(MultibodyModel const &model, VectorX const &q);
+
+SpatialVector compute_end_effector_classical_acceleration(MultibodyModel const &model,
+  SystemConfiguration const &system_configuration,
+  ReferenceFrame const reference_frame = ReferenceFrame::WORLD);
+
+struct KinematicsResult
+{
+  SpatialVector spatial_velocity;
+  SpatialVector spatial_acceleration;
+};
+
+KinematicsResult compute_end_effector_forward_kinematics(MultibodyModel const &model,
+  SystemConfiguration const &system_configuration,
+  ReferenceFrame const reference_frame = ReferenceFrame::WORLD);
+
 
 }// namespace legged_ctrl
 
