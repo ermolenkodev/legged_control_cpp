@@ -1,11 +1,14 @@
-#include "mujoco_api.hpp"
 #include "gains.hpp"
+#include "mujoco_api.hpp"
 
 #define ASSETS_PATH CMAKE_ASSETS_PATH
 
 using namespace task_space_control;
 
-VectorX compute_control_torques(Mujoco const &mujoco, MultibodyModel const &model, int mocap_id, GainMatrices const &gains)
+#define ENABLE_INVERSE_DYNAMICS 1
+
+VectorX
+  compute_control_torques(Mujoco const &mujoco, MultibodyModel const &model, int mocap_id, GainMatrices const &gains)
 {
   auto q = mujoco.state.get_joint_positions();
   auto [wPee, wRee] = legged_ctrl::compute_end_effector_placement(model, q);
@@ -31,15 +34,31 @@ VectorX compute_control_torques(Mujoco const &mujoco, MultibodyModel const &mode
   auto v = twist.tail<3>();
   auto omega = twist.head<3>();
 
-  auto g = legged_ctrl::compute_gravity_effect(model, legged_ctrl::SystemConfiguration{ q });
-
   auto [Kxp, Kxd, Kop, Kod] = gains;
 
   legged_ctrl::SpatialVector F;
   F.tail(3) = Kxp * (wPd - wPee) + Kxd * (-v);
   F.head(3) = Kop * wO_error + Kod * (-omega);
 
+#if ENABLE_INVERSE_DYNAMICS
+  auto qdd = mujoco.state.get_joint_accelerations();
+  auto [M, C] = legged_ctrl::crba(model, legged_ctrl::SystemConfiguration{ q, qd, qdd });
+  auto lambda = (J * M.inverse() * J.transpose()).completeOrthogonalDecomposition().pseudoInverse();
+
+  //  TODO: fix mu term computation
+  //  auto Jdqd = legged_ctrl::compute_end_effector_classical_acceleration(model,
+  //    legged_ctrl::SystemConfiguration{ q, qd, qdd }, legged_ctrl::ReferenceFrame::LOCAL_WORLD_ALIGNED);
+  //  auto JTpinv = J.transpose().completeOrthogonalDecomposition().pseudoInverse();
+  //  auto mu = JTpinv * C - lambda * Jdqd;
+
+  F = lambda * F;
+
+  return J.transpose() * F + C;
+#else
+  auto g = legged_ctrl::compute_gravity_effect(model, legged_ctrl::SystemConfiguration{ q });
+
   return J.transpose() * F + g;
+#endif
 }
 
 void simulation_and_control_loop(Mujoco &mujoco, std::string const &scene_path, MultibodyModel const &model)
@@ -47,13 +66,17 @@ void simulation_and_control_loop(Mujoco &mujoco, std::string const &scene_path, 
   bool const ok = mujoco.load_model(scene_path);
   if (!ok) { throw std::runtime_error("Failed to load scene"); }
 
-  mujoco.scene.set_state_from_keyframe("home");
+  mujoco.state.set_state_from_keyframe("home");
 
   int const mocap_id = mujoco.scene.get_mocap_id("target");
   std::vector<int> const actuator_ids =
     mujoco.scene.get_actuator_ids({ "joint1", "joint2", "joint3", "joint4", "joint5", "joint6", "joint7" });
 
-  GainMatrices const gains{};
+#if ENABLE_INVERSE_DYNAMICS
+  GainMatrices const gains{ 300, 30, 100, 10 };
+#else
+  GainMatrices const gains{ 500, 50, 10, .1 };
+#endif
 
   while (!mujoco.gui.is_exit_requested()) {
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -72,9 +95,7 @@ void simulation_and_control_loop(Mujoco &mujoco, std::string const &scene_path, 
       auto const cpu_iteration_start = Mujoco::Clock::now();
       double const sim_iteration_start = mujoco.time_api.get_sim_time();
 
-      if (mujoco.gui.is_ctrl_noise_enabled()) {
-        mujoco.simulator.init_ctrl_noise_with_stddev();
-      }
+      if (mujoco.gui.is_ctrl_noise_enabled()) { mujoco.simulator.init_ctrl_noise_with_stddev(); }
 
       // out-of-sync (for any reason): reset sync times, step
       if (mujoco.time_api.is_cpu_and_sim_time_out_of_sync(cpu_iteration_start, sim_iteration_start)) {

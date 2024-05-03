@@ -87,8 +87,11 @@ public:
     explicit State(LowLevelMujocoObjects &mujoco_objects) : mujoco_objects(mujoco_objects) {}
     VectorX get_joint_positions() const;
     VectorX get_joint_velocities() const;
+    VectorX get_joint_accelerations() const;
     Vector3 get_mocap_position(int mocap_id) const;
     SO3 get_mocap_orientation(int mocap_id) const;
+    void set_state_from_keyframe(std::string const &keyframe_name);
+    VectorX get_state_from_keyframe(std::string const &keyframe_name) const;
   private:
     LowLevelMujocoObjects &mujoco_objects;
   };
@@ -127,8 +130,6 @@ public:
     explicit Scene(LowLevelMujocoObjects &mujoco_objects) : mujoco_objects(mujoco_objects) {}
     int get_mocap_id(std::string const &name) const;
     [[nodiscard]] int get_site_id(std::string const &name) const;
-    void set_state_from_keyframe(std::string const &keyframe_name);
-
     int get_actuator_id(std::string const &name) const;
     std::vector<int> get_actuator_ids(std::vector<std::string> const &joint_names) const;
   private:

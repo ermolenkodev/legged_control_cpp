@@ -171,6 +171,11 @@ VectorX Mujoco::State::get_joint_velocities() const
   return VectorX{ Eigen::Map<Eigen::VectorXd>(mujoco_objects.d->qvel, mujoco_objects.m->nv) };
 }
 
+VectorX Mujoco::State::get_joint_accelerations() const
+{
+  return VectorX{ Eigen::Map<Eigen::VectorXd>(mujoco_objects.d->qacc, mujoco_objects.m->nv) };
+}
+
 Vector3 Mujoco::State::get_mocap_position(int mocap_id) const
 {
   return Vector3{ Eigen::Map<Eigen::VectorXd>(&mujoco_objects.d->mocap_pos[mocap_id], 3) };
@@ -240,11 +245,19 @@ namespace {
   }
 }// namespace
 
-void Mujoco::Scene::set_state_from_keyframe(const std::string &keyframe_name)
+void Mujoco::State::set_state_from_keyframe(const std::string &keyframe_name)
 {
   int const key_id =
     get_id(keyframe_name.c_str(), mujoco_objects.m->name_keyadr, mujoco_objects.m->names, mujoco_objects.m->nkey);
   mj_resetDataKeyframe(mujoco_objects.m.get(), mujoco_objects.d.get(), key_id);
+}
+
+VectorX Mujoco::State::get_state_from_keyframe(const std::string &keyframe_name) const
+{
+  int const key_id =
+    get_id(keyframe_name.c_str(), mujoco_objects.m->name_keyadr, mujoco_objects.m->names, mujoco_objects.m->nkey);
+
+  return VectorX{ Eigen::Map<VectorX>(&mujoco_objects.m->key_qpos[key_id], mujoco_objects.m->nq) };
 }
 
 int Mujoco::Scene::get_mocap_id(const std::string &name) const
