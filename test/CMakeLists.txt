@@ -20,8 +20,7 @@ endif ()
 include(${Catch2_SOURCE_DIR}/extras/Catch.cmake)
 
 # Add a file containing a set of constexpr tests
-add_executable(constexpr_tests constexpr_tests.cpp
-        forward_kinematics_tests.cpp)
+add_executable(constexpr_tests constexpr_tests.cpp)
 target_link_system_libraries(
         constexpr_tests
         PRIVATE
@@ -91,8 +90,6 @@ target_include_directories(
         PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/test_data)
 
-target_compile_definitions(inverse_dynamics_tests PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../assets")
-
 catch_discover_tests(
         inverse_dynamics_tests
         TEST_PREFIX
@@ -123,8 +120,6 @@ target_include_directories(
         mjxml_parsing_tests
         PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/test_data)
-
-target_compile_definitions(mjxml_parsing_tests PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../assets")
 
 catch_discover_tests(
         mjxml_parsing_tests
@@ -157,8 +152,6 @@ target_include_directories(
         forward_kinematics_tests
         PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/test_data)
-
-target_compile_definitions(forward_kinematics_tests PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../assets")
 
 catch_discover_tests(
         forward_kinematics_tests

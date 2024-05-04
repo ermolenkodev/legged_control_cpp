@@ -1,6 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include "iostream"
 #include "legged_control_cpp/forward_kinematics.hpp"
 #include "legged_control_cpp/model.hpp"
 #include "test_data/bundled_models.hpp"
