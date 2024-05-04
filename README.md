@@ -8,18 +8,19 @@ The project is a ground-up implementation of Rigid Body Dynamics and high-level 
 The primary goal is to develop all these algorithms from scratch (possibly excluding the QP solver), and to do so without utilizing any external robotics libraries, such as Pinocchio, Drake, etc.
 
 ### Task space control demo
-https://github.com/ermolenkodev/legged_control_cpp/assets/26741087/ad6790a7-bafb-4df7-8795-f46ae2a196d6
+https://github.com/ermolenkodev/legged_control_cpp/assets/26741087/041bcfa1-0314-444f-8435-72e6c9249ddf
+
 
 ## Planned features
 - [x] Model of kinematic tree
 - [x] Basic URDF parsing
 - [x] Basic Mjxml parsing
 - [x] Simple visualization
-- [ ] Rigid Body Dynamics
+- [x] Rigid Body Dynamics
   - [x] Recursive Newton-Euler Algorithm
   - [x] Composite Rigid Body Algorithm
   - [x] Jacobian computation
-  - [ ] Classic acceleration computation
+  - [x] Classic acceleration computation
 - [ ] Manipulator Control
   - [x] Joint Space Control
     - [x] Simple PD Control
@@ -29,6 +30,8 @@ https://github.com/ermolenkodev/legged_control_cpp/assets/26741087/ad6790a7-bafb
   - [ ] Task Space Control
     - [x] Integration with Mujoco
     - [x] Simple PD Control in Task Space
+    - [x] Inverse dynamics in Task Space
+    - [ ] Null-space control
   - [ ] Contact consistent dynamics
 - [ ] Legged Robot Control
   - [ ] Simulation of legged robot
