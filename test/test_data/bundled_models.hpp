@@ -22,19 +22,19 @@ std::string get_assets_path(const char* filePath) {
 
 MultibodyModel ur5_model()
 {
-  std::string const urdf_path = std::string(ASSETS_PATH) + "/ur5.urdf";
+  std::string const urdf_path = ASSETS_PATH + "/ur5.urdf";
   return urdf_parser::parse_urdf(urdf_path);
 }
 
 MultibodyModel iiwa14_model_urdf()
 {
-  std::string const urdf_path = std::string(ASSETS_PATH) + "/iiwa14.urdf";
+  std::string const urdf_path = ASSETS_PATH + "/iiwa14.urdf";
   return urdf_parser::parse_urdf(urdf_path);
 }
 
 MultibodyModel iiwa14_model_mjxml()
 {
-  std::string const mjxml_path = std::string(ASSETS_PATH) + "/scene/iiwa14.xml";
+  std::string const mjxml_path = ASSETS_PATH + "/scene/iiwa14.xml";
   return mjxml::parse_mujoco_xml(mjxml_path);
 }
 
