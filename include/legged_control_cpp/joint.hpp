@@ -10,7 +10,7 @@ namespace legged_ctrl {
 
 enum class JointAxis { X, Y, Z, UNALIGNED };
 
-template<typename Derived> class JointMetadata : public Crtp<Derived>
+template<typename Derived> class JointModel : public Crtp<Derived>
 {
 public:
   [[nodiscard]] SpatialMatrix joint_transform(double theta) const
@@ -20,14 +20,14 @@ public:
 
   [[nodiscard]] SpatialVector screw_axis() const { return this->derived().screw_axis_impl(); }
 
-  bool operator==(JointMetadata const &other) const { return this->derived().operator==(other.derived()); }
+  bool operator==(JointModel const &other) const { return this->derived().operator==(other.derived()); }
 
 private:
-  JointMetadata() = default;
+  JointModel() = default;
   friend Derived;
 };
 
-class RevoluteJoint : public JointMetadata<RevoluteJoint>
+class RevoluteJoint : public JointModel<RevoluteJoint>
 {
 public:
   explicit RevoluteJoint(JointAxis axis) : axis_(axis) {}
