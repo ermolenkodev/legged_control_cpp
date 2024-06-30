@@ -65,8 +65,8 @@ KinematicsResult compute_end_effector_forward_kinematics(MultibodyModel const &m
     A[i] = Xup * A[parent[i]] + S * qdd(i) + Vx(V[i]) * Vj;
   }
 
-  SpatialVector const &nV = V.at(model.n_bodies_ - 1);
-  SpatialVector const &nA = A.at(model.n_bodies_ - 1);
+  SpatialVector const &nV = V.at(model.n_bodies - 1);
+  SpatialVector const &nA = A.at(model.n_bodies - 1);
 
   SpatialMatrix const nXee = Ad(nTee);
   SpatialMatrix const wXee = wXi * nXee;

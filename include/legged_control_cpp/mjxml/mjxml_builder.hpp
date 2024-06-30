@@ -13,7 +13,7 @@ class MjxmlModelBuilderWithoutRoot : public MultibodyModelBuilderBase
 public:
   MjxmlModelBuilderWithoutRoot();
   MjxmlMultibodyModelBuilder set_root(tinyxml2::XMLElement const *root_xml);
-  MjxmlModelBuilderWithoutRoot &set_logger(spdlog::logger logger) override;
+  MjxmlModelBuilderWithoutRoot &set_logger(spdlog::logger logger_) override;
 };
 
 class MjxmlMultibodyModelBuilder : public MultibodyModelBuilderBase
@@ -23,13 +23,13 @@ public:
     tinyxml2::XMLElement const *parent_link_xml,
     std::string const &inherited_class);
 
-  MjxmlMultibodyModelBuilder &set_logger(spdlog::logger logger) override;
+  MjxmlMultibodyModelBuilder &set_logger(spdlog::logger logger_) override;
   MjxmlMultibodyModelBuilder &set_defaults(tinyxml2::XMLElement const *defaults_xml);
 
 private:
   std::unordered_map<std::string, ModelElementClass> model_elements_classes;
 
-  MjxmlMultibodyModelBuilder(ModelPtr model, LinkNameToIndexMapPtr link_name_to_idx, LoggerPtr logger);
+  MjxmlMultibodyModelBuilder(ModelPtr model_, LinkNameToIndexMapPtr link_name_to_idx_, LoggerPtr logger_);
 
   std::unordered_map<std::string, std::string> get_attributes(std::string const &model_element,
     std::string const &class_name);

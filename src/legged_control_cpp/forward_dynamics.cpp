@@ -29,7 +29,7 @@ std::vector<SpatialMatrix> compute_composite_inertia(const MultibodyModel &model
   int const n_bodies = model.num_bodies();
   std::vector<int> const &parent = model.get_parent_idxs();
 
-  std::vector<SpatialMatrix> Ic(model.I_);
+  std::vector<SpatialMatrix> Ic(model.I);
   for (int i = n_bodies - 1; i >= 0; --i) {
     if (parent[i] != -1) { Ic[parent[i]] += Xup[i].transpose() * Ic[i] * Xup[i]; }
   }
