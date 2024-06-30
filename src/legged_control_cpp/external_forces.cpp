@@ -11,7 +11,7 @@ void apply_end_effector_exerted_force(IndexedSpatialVectors &F,
   if (!external_forces.f_tip.has_value()) { return; }
   auto T_n_ee = model.get_ee_transform();
   if (!T_n_ee.has_value()) { return; }
-  auto &last_link_wrench = F.at(model.n_bodies_ - 1);
+  auto &last_link_wrench = F.at(model.n_bodies - 1);
   auto X_n_ee = Ad(Tinv(T_n_ee.value()));
   last_link_wrench += X_n_ee.transpose() * external_forces.f_tip.value();
 }

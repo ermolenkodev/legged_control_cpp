@@ -14,21 +14,21 @@ mjxml::MjxmlModelBuilderWithoutRoot MultibodyModel::create_from_mjxml()
 
 std::ostream &operator<<(std::ostream &os, MultibodyModel const &model)
 {
-  os << model.name_ << std::endl;
-  os << "n_bodies: " << model.n_bodies_ << std::endl;
+  os << model.name << std::endl;
+  os << "n_bodies: " << model.n_bodies << std::endl;
   return os;
 }
 
 LCC_DISABLE_SIGN_CONVERSION
 bool MultibodyModel::operator==(const MultibodyModel &other) const
 {
-  if (n_bodies_ != other.n_bodies_) { return false; }
+  if (n_bodies != other.n_bodies) { return false; }
 
-  for (int i = 0; i < n_bodies_; ++i) {
-    if (joints_[i] != other.joints_[i]) { return false; }
-    if (parent_[i] != other.parent_[i]) { return false; }
-    if (!X_tree_[i].isApprox(other.X_tree_[i])) { return false; }
-    if (!I_[i].isApprox(other.I_[i])) { return false; }
+  for (int i = 0; i < n_bodies; ++i) {
+    if (joints[i] != other.joints[i]) { return false; }
+    if (parent[i] != other.parent[i]) { return false; }
+    if (!X_tree[i].isApprox(other.X_tree[i])) { return false; }
+    if (!I[i].isApprox(other.I[i])) { return false; }
   }
 
   return true;

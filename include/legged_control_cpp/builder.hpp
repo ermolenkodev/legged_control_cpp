@@ -14,21 +14,21 @@ namespace legged_ctrl {
 class MultibodyModelBuilderBase
 {
 public:
-  virtual MultibodyModelBuilderBase &set_logger(spdlog::logger logger);
-  [[nodiscard]] MultibodyModel build() const { return std::move(*model_); }
+  virtual MultibodyModelBuilderBase &set_logger(spdlog::logger logger_);
+  [[nodiscard]] MultibodyModel build() const { return std::move(*model); }
   virtual ~MultibodyModelBuilderBase() = default;
 
 protected:
-  MultibodyModelBuilderBase(ModelPtr model, LinkNameToIndexMapPtr link_name_to_idx);
-  MultibodyModelBuilderBase(ModelPtr model, LinkNameToIndexMapPtr link_name_to_idx, LoggerPtr logger);
+  MultibodyModelBuilderBase(ModelPtr model_, LinkNameToIndexMapPtr link_name_to_idx_);
+  MultibodyModelBuilderBase(ModelPtr model_, LinkNameToIndexMapPtr link_name_to_idx_, LoggerPtr logger_);
   MultibodyModelBuilderBase(MultibodyModelBuilderBase &&) = default;
   MultibodyModelBuilderBase &operator=(MultibodyModelBuilderBase &&) = default;
   MultibodyModelBuilderBase(MultibodyModelBuilderBase const &) = default;
   MultibodyModelBuilderBase &operator=(MultibodyModelBuilderBase const &) = default;
 
-  ModelPtr model_{};
-  LinkNameToIndexMapPtr link_name_to_idx_{};
-  LoggerPtr logger_{ null_logger() };
+  ModelPtr model{};
+  LinkNameToIndexMapPtr link_name_to_idx{};
+  LoggerPtr logger{ null_logger() };
 };
 
 class MultibodyModelBuilderWithoutRoot : public MultibodyModelBuilderBase
@@ -36,17 +36,17 @@ class MultibodyModelBuilderWithoutRoot : public MultibodyModelBuilderBase
 public:
   MultibodyModelBuilderWithoutRoot();
   MultibodyModelBuilder set_root(::urdf::ModelInterfaceSharedPtr const &urdf_tree);
-  MultibodyModelBuilderWithoutRoot &set_logger(spdlog::logger logger) override;
+  MultibodyModelBuilderWithoutRoot &set_logger(spdlog::logger logger_) override;
 };
 
 class MultibodyModelBuilder : public MultibodyModelBuilderBase
 {
 public:
   MultibodyModelBuilder &add_link(::urdf::LinkConstSharedPtr const &link);
-  MultibodyModelBuilder &set_logger(spdlog::logger logger) override;
+  MultibodyModelBuilder &set_logger(spdlog::logger logger_) override;
 
 private:
-  MultibodyModelBuilder(ModelPtr model, LinkNameToIndexMapPtr link_name_to_idx, LoggerPtr logger);
+  MultibodyModelBuilder(ModelPtr model_, LinkNameToIndexMapPtr link_name_to_idx_, LoggerPtr logger_);
   friend class MultibodyModelBuilderWithoutRoot;
 };
 

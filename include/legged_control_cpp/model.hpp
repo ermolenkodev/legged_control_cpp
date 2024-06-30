@@ -25,13 +25,13 @@ namespace legged_ctrl {
 struct MultibodyModel
 {
 public:
-  std::string name_{};
-  int n_bodies_{ 0 };
-  std::vector<JointModelVariant> joints_{};
-  std::vector<int> parent_{};
-  std::vector<SpatialMatrix> X_tree_{};
-  std::vector<SpatialMatrix> I_{};
-  std::optional<SE3> nTee_{ std::nullopt };
+  std::string name{};
+  int n_bodies{ 0 };
+  std::vector<JointModelVariant> joints{};
+  std::vector<int> parent{};
+  std::vector<SpatialMatrix> X_tree{};
+  std::vector<SpatialMatrix> I{};
+  std::optional<SE3> nTee{ std::nullopt };
 
   static MultibodyModelBuilderWithoutRoot create_from_urdf();
   static mjxml::MjxmlModelBuilderWithoutRoot create_from_mjxml();
@@ -40,11 +40,11 @@ public:
 
   friend std::ostream &operator<<(std::ostream &os, MultibodyModel const &model);
 
-  [[nodiscard]] std::optional<SE3> const &get_ee_transform() const { return nTee_; }
+  [[nodiscard]] std::optional<SE3> const &get_ee_transform() const { return nTee; }
 
-  [[nodiscard]] int num_bodies() const { return n_bodies_; }
+  [[nodiscard]] int num_bodies() const { return n_bodies; }
 
-  [[nodiscard]] std::vector<int> get_parent_idxs() const { return parent_; }
+  [[nodiscard]] std::vector<int> get_parent_idxs() const { return parent; }
 
   bool operator==(MultibodyModel const &other) const;
 };

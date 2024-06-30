@@ -11,17 +11,17 @@ using namespace details;
 
 MjxmlMultibodyModelBuilder MjxmlModelBuilderWithoutRoot::set_root(tinyxml2::XMLElement const *root_xml)
 {
-  (*link_name_to_idx_)[root_xml->Attribute("name")] = -1;
-  return { model_, link_name_to_idx_, logger_ };
+  (*link_name_to_idx)[root_xml->Attribute("name")] = -1;
+  return { model, link_name_to_idx, logger };
 }
 
 MjxmlModelBuilderWithoutRoot::MjxmlModelBuilderWithoutRoot()
   : MultibodyModelBuilderBase{ std::make_shared<MultibodyModel>(), std::make_shared<LinkNameToIndexMap>() }
 {}
 
-MjxmlModelBuilderWithoutRoot &MjxmlModelBuilderWithoutRoot::set_logger(spdlog::logger logger)
+MjxmlModelBuilderWithoutRoot &MjxmlModelBuilderWithoutRoot::set_logger(spdlog::logger logger_)
 {
-  MultibodyModelBuilderBase::set_logger(std::move(logger));
+  MultibodyModelBuilderBase::set_logger(std::move(logger_));
   return *this;
 }
 
@@ -55,38 +55,38 @@ MjxmlMultibodyModelBuilder &MjxmlMultibodyModelBuilder::add_link(tinyxml2::XMLEl
   std::string const &inherited_class)
 {
   std::string const link_name = link_xml->Attribute("name");
-  logger_->debug("Processing link: {}", link_name);
+  logger->debug("Processing link: {}", link_name);
 
   tinyxml2::XMLElement const *inertial_xml = link_xml->FirstChildElement("inertial");
   if (inertial_xml != nullptr) {
-    model_->I_.emplace_back(process_inertia(inherited_class, inertial_xml));
+    model->I.emplace_back(process_inertia(inherited_class, inertial_xml));
   } else {
     std::string const link_class = get_attribute(link_xml, CLASS, AttributeValue{ inherited_class });
-    model_->nTee_ = get_link_transform(link_xml, get_attributes("body", link_class));
+    model->nTee = get_link_transform(link_xml, get_attributes("body", link_class));
 
     return *this;
   }
 
   std::string const parent_link_name = parent_link_xml->Attribute("name");
-  if (link_name_to_idx_->find(parent_link_name) == link_name_to_idx_->end()) {
+  if (link_name_to_idx->find(parent_link_name) == link_name_to_idx->end()) {
     throw std::invalid_argument(fmt::format(
       "Failed to process link: {}. Parent link {} not found, it must be added before", link_name, parent_link_name));
   }
 
-  int const parent_idx = (*link_name_to_idx_)[parent_link_name];
-  model_->parent_.emplace_back(parent_idx);
-  (*link_name_to_idx_)[link_name] = static_cast<int>((*model_).parent_.size() - 1);
-  model_->n_bodies_++;
+  int const parent_idx = (*link_name_to_idx)[parent_link_name];
+  model->parent.emplace_back(parent_idx);
+  (*link_name_to_idx)[link_name] = static_cast<int>((*model).parent.size() - 1);
+  model->n_bodies++;
 
   std::string const link_class = get_attribute(link_xml, CLASS, AttributeValue{ inherited_class });
   SE3 const T = Tinv(get_link_transform(link_xml, get_attributes("body", link_class)));
   SpatialMatrix const X = Ad(T);
-  model_->X_tree_.emplace_back(X);
+  model->X_tree.emplace_back(X);
 
   tinyxml2::XMLElement const *joint_xml = link_xml->FirstChildElement("joint");
   if (joint_xml != nullptr) {
     RevoluteJoint joint = process_joint(inherited_class, joint_xml);
-    model_->joints_.emplace_back(joint);
+    model->joints.emplace_back(joint);
   }
 
   return *this;
@@ -116,33 +116,33 @@ SpatialMatrix MjxmlMultibodyModelBuilder::process_inertia(const std::string &inh
 
   Vector3 const i_P_C = parse_vector3(get_attribute(inertial, POS, defaults, DEFAULT_POS));
   SO3 const i_R_C = parse_quaternion(get_attribute(inertial, QUAT, defaults, DEFAULT_QUAT)).matrix();
-  logger_->debug("CoM position: \n{}", matrix_to_str(i_P_C));
-  logger_->debug("CoM orientation:\n{}", matrix_to_str(i_R_C));
+  logger->debug("CoM position: \n{}", matrix_to_str(i_P_C));
+  logger->debug("CoM orientation:\n{}", matrix_to_str(i_R_C));
 
   Vector3 const diag_inertia = parse_vector3(get_attribute(inertial, DIAGINERTIA, defaults, DEFAULT_DIAGINERTIA));
   RotationalInertia rotI_C_C;
   rotI_C_C << diag_inertia(0), 0, 0, 0, diag_inertia(1), 0, 0, 0, diag_inertia(2);
-  logger_->debug("Rotation inertia in CoM frame:\n{}", matrix_to_str(rotI_C_C));
+  logger->debug("Rotation inertia in CoM frame:\n{}", matrix_to_str(rotI_C_C));
 
   RotationalInertia const rotI_C_i = i_R_C * rotI_C_C * i_R_C.transpose();
-  logger_->debug("Rotation inertia in link frame:\n{}", matrix_to_str(rotI_C_i));
+  logger->debug("Rotation inertia in link frame:\n{}", matrix_to_str(rotI_C_i));
 
   double const mass = std::stod(get_attribute(inertial, MASS, defaults, ZERO));
   auto I = I_from_rotinertia_about_com(rotI_C_i, i_P_C, mass);
-  logger_->debug("Spatial inertia:\n{}", matrix_to_str(I));
+  logger->debug("Spatial inertia:\n{}", matrix_to_str(I));
 
   return I;
 }
 
-MjxmlMultibodyModelBuilder::MjxmlMultibodyModelBuilder(ModelPtr model,
-  LinkNameToIndexMapPtr link_name_to_idx,
-  LoggerPtr logger)
-  : MultibodyModelBuilderBase(std::move(model), std::move(link_name_to_idx), std::move(logger))
+MjxmlMultibodyModelBuilder::MjxmlMultibodyModelBuilder(ModelPtr model_,
+  LinkNameToIndexMapPtr link_name_to_idx_,
+  LoggerPtr logger_)
+  : MultibodyModelBuilderBase(std::move(model_), std::move(link_name_to_idx_), std::move(logger_))
 {}
 
-MjxmlMultibodyModelBuilder &MjxmlMultibodyModelBuilder::set_logger(spdlog::logger logger)
+MjxmlMultibodyModelBuilder &MjxmlMultibodyModelBuilder::set_logger(spdlog::logger logger_)
 {
-  logger_->swap(logger);
+  this->logger->swap(logger_);
   return *this;
 }
 
