@@ -27,11 +27,11 @@ https://github.com/ermolenkodev/legged_control_cpp/assets/26741087/041bcfa1-0314
     - [x] PD Control with Gravity Compensation
     - [x] Feedforward Control
     - [x] Inverse Dynamics Control
-  - [ ] Task Space Control
+  - [x] Task Space Control
     - [x] Integration with Mujoco
     - [x] Simple PD Control in Task Space
     - [x] Inverse dynamics in Task Space
-    - [ ] Null-space control
+    - [x] Null-space control
   - [ ] Contact consistent dynamics
 - [ ] Legged Robot Control
   - [ ] Simulation of legged robot
