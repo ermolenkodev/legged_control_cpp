@@ -42,11 +42,12 @@ public:
 class MultibodyModelBuilder : public MultibodyModelBuilderBase
 {
 public:
-  MultibodyModelBuilder &add_link(::urdf::LinkConstSharedPtr const &link);
+  MultibodyModelBuilder &add_link_and_joint_to_model(::urdf::LinkConstSharedPtr const &link, ::urdf::JointConstSharedPtr const &joint);
   MultibodyModelBuilder &set_logger(spdlog::logger logger_) override;
 
 private:
   MultibodyModelBuilder(ModelPtr model_, LinkNameToIndexMapPtr link_name_to_idx_, LoggerPtr logger_);
+  int get_parent_idx(::urdf::LinkConstSharedPtr const &link) const;
   friend class MultibodyModelBuilderWithoutRoot;
 };
 

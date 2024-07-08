@@ -128,7 +128,7 @@ SpatialMatrix MjxmlMultibodyModelBuilder::process_inertia(const std::string &inh
   logger->debug("Rotation inertia in link frame:\n{}", matrix_to_str(rotI_C_i));
 
   double const mass = std::stod(get_attribute(inertial, MASS, defaults, ZERO));
-  auto I = I_from_rotinertia_about_com(rotI_C_i, i_P_C, mass);
+  auto I = apply_steiners_theorem(rotI_C_i, i_P_C, mass);
   logger->debug("Spatial inertia:\n{}", matrix_to_str(I));
 
   return I;

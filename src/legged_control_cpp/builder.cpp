@@ -45,7 +45,9 @@ MultibodyModelBuilderWithoutRoot &MultibodyModelBuilderWithoutRoot::set_logger(s
   return *this;
 }
 
-MultibodyModelBuilder::MultibodyModelBuilder(ModelPtr model_, LinkNameToIndexMapPtr link_name_to_idx_, LoggerPtr logger_)
+MultibodyModelBuilder::MultibodyModelBuilder(ModelPtr model_,
+  LinkNameToIndexMapPtr link_name_to_idx_,
+  LoggerPtr logger_)
   : MultibodyModelBuilderBase(std::move(model_), std::move(link_name_to_idx_), std::move(logger_))
 {}
 
@@ -63,7 +65,7 @@ bool operator==(::urdf::Vector3 const &lhs, urdf::Vector3 const &rhs)
   return close_enough(lhs.x, rhs.x) && close_enough(lhs.y, rhs.y) && close_enough(lhs.z, rhs.z);
 }
 
-SE3 convert_from_urdf(::urdf::Pose const &pose)
+SE3 urdf_pose_to_SE3(::urdf::Pose const &pose)
 {
   ::urdf::Vector3 const &p = pose.position;
   ::urdf::Rotation const &q = pose.rotation;
@@ -77,59 +79,89 @@ SE3 convert_from_urdf(::urdf::Pose const &pose)
 
 namespace {
   std::array<double, 3> convert_to_array(::urdf::Vector3 const &vec) { return { vec.x, vec.y, vec.z }; }
-}// namespace
 
-MultibodyModelBuilder &MultibodyModelBuilder::add_link(::urdf::LinkConstSharedPtr const &link)
-{
-  logger->debug("Processing link: {}", link->name);
+  JointAxis map_to_model_axis(::urdf::Vector3 const &v) { return determine_joint_axis(convert_to_array(v)); }
 
-  if (link->parent_joint->type == ::urdf::Joint::REVOLUTE) {
-    auto joint = RevoluteJoint(determine_joint_axis(convert_to_array(link->parent_joint->axis)));
-    model->joints.emplace_back(joint);
-  } else if (link->parent_joint->type == ::urdf::Joint::FIXED) {
-    if (link->name == "ee_link") {
-      logger->debug("Found end effector link");
-      model->nTee = convert_from_urdf(link->parent_joint->parent_to_joint_origin_transform);
-      // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-      logger->debug("End effector transform: \n{}", matrix_to_str(model->nTee.value()));
+  void add_joint_to_model(MultibodyModel &model, ::urdf::JointConstSharedPtr const &joint)
+  {
+    if (joint->type == ::urdf::Joint::REVOLUTE) {
+      auto revolute_joint = RevoluteJoint(map_to_model_axis(joint->axis));
+      model.joints.emplace_back(revolute_joint);
+    } else if (joint->type == ::urdf::Joint::FIXED) {
+      // noop
+    } else {
+      not_implemented();
     }
-    return *this;
-  } else {
-    not_implemented();
   }
 
+  bool is_end_effector(::urdf::LinkConstSharedPtr const &link)
+  {
+    return link->name == "ee_link";// dummy implementation
+  }
+
+  std::pair<Vector3, SO3> get_com_position_and_orientation(::urdf::Inertial const &Y)
+  {
+    ::urdf::Vector3 const &p = Y.origin.position;
+    ::urdf::Rotation const &q = Y.origin.rotation;
+
+    Vector3 p_C_i = Vector3(p.x, p.y, p.z);
+    SO3 const R_i_C = Quaternion(q.w, q.x, q.y, q.z).matrix();
+
+    return { p_C_i, R_i_C };
+  }
+}// namespace
+
+int MultibodyModelBuilder::get_parent_idx(::urdf::LinkConstSharedPtr const &link) const
+{
   std::string const &parent_link_name = link->getParent()->name;
   if (link_name_to_idx->find(parent_link_name) == link_name_to_idx->end()) {
     throw std::invalid_argument(fmt::format(
       "Failed to process link: {}. Parent link {} not found, it must be added before", link->name, parent_link_name));
   }
-  int const parent_idx = (*link_name_to_idx)[parent_link_name];
-  model->parent.emplace_back(parent_idx);
-  (*link_name_to_idx)[link->name] = static_cast<int>((*model).parent.size() - 1);
-  model->n_bodies++;
 
-  SE3 T = Tinv(convert_from_urdf(link->parent_joint->parent_to_joint_origin_transform));
+  return link_name_to_idx->at(parent_link_name);
+}
+
+MultibodyModelBuilder &MultibodyModelBuilder::add_link_and_joint_to_model(::urdf::LinkConstSharedPtr const &link,
+  ::urdf::JointConstSharedPtr const &joint)
+{
+  logger->debug("Processing link: {}", link->name);
+
+  if (joint->type == ::urdf::Joint::FIXED and not is_end_effector(link)) { return *this; }
+
+  if (is_end_effector(link)) {
+    logger->debug("Found end effector link");
+    model->nTee = urdf_pose_to_SE3(link->parent_joint->parent_to_joint_origin_transform);
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+    logger->debug("End effector transform: \n{}", matrix_to_str(model->nTee.value()));
+
+    return *this;
+  }
+
+  add_joint_to_model(*model, joint);
+
+  int const parent_idx = get_parent_idx(link);
+  model->parent.emplace_back(parent_idx);
+  (*link_name_to_idx)[link->name] = model->n_bodies++;
+
+  SE3 T = Tinv(urdf_pose_to_SE3(joint->parent_to_joint_origin_transform));
   auto X = Ad(T);
   logger->debug("Spatial transform: \n{}", matrix_to_str(X));
   model->X_tree.emplace_back(X);
 
   ::urdf::Inertial const &Y = *link->inertial;
-  ::urdf::Vector3 const &p = Y.origin.position;
-  ::urdf::Rotation const &q = Y.origin.rotation;
+  auto [ipC, iRC] = get_com_position_and_orientation(Y);
+  logger->debug("CoM position: \n{}", matrix_to_str(ipC));
+  logger->debug("CoM orientation:\n{}", matrix_to_str(iRC));
 
-  Vector3 p_C_i = Vector3(p.x, p.y, p.z);
-  SO3 const &R_i_C = Quaternion(q.w, q.x, q.y, q.z).matrix();
-  logger->debug("CoM position: \n{}", matrix_to_str(p_C_i));
-  logger->debug("CoM orientation:\n{}", matrix_to_str(R_i_C));
+  RotationalInertia C_rotI_C;
+  C_rotI_C << Y.ixx, Y.ixy, Y.ixz, Y.ixy, Y.iyy, Y.iyz, Y.ixz, Y.iyz, Y.izz;
+  logger->debug("Rotation inertia in CoM frame:\n{}", matrix_to_str(C_rotI_C));
 
-  RotationalInertia rotI_C_C;
-  rotI_C_C << Y.ixx, Y.ixy, Y.ixz, Y.ixy, Y.iyy, Y.iyz, Y.ixz, Y.iyz, Y.izz;
-  logger->debug("Rotation inertia in CoM frame:\n{}", matrix_to_str(rotI_C_C));
+  RotationalInertia const i_rotI_C = iRC * C_rotI_C * iRC.transpose();
+  logger->debug("Rotation inertia in link frame:\n{}", matrix_to_str(i_rotI_C));
 
-  RotationalInertia const rotI_C_i = R_i_C * rotI_C_C * R_i_C.transpose();
-  logger->debug("Rotation inertia in link frame:\n{}", matrix_to_str(rotI_C_i));
-
-  auto I = I_from_rotinertia_about_com(rotI_C_i, p_C_i, Y.mass);
+  auto I = apply_steiners_theorem(i_rotI_C, ipC, Y.mass);
   logger->debug("Spatial inertia:\n{}", matrix_to_str(I));
   model->I.emplace_back(I);
 

@@ -20,7 +20,8 @@ MultibodyModel parse_urdf(std::string const &filename, std::optional<spdlog::log
     ::urdf::LinkConstSharedPtr const link = link_queue.front();
     link_queue.pop();
     for (auto const &child_link : link->child_links) { link_queue.push(child_link); }
-    builder.add_link(link);
+
+    builder.add_link_and_joint_to_model(link, link->parent_joint);
   }
 
   return builder.build();
