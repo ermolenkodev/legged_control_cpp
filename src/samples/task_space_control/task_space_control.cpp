@@ -6,6 +6,7 @@
 using namespace task_space_control;
 
 #define ENABLE_INVERSE_DYNAMICS 1
+#define ENABLE_POSTURE_CONTROL 1
 
 VectorX
   compute_control_torques(Mujoco const &mujoco, MultibodyModel const &model, int mocap_id, GainMatrices const &gains)
@@ -41,19 +42,25 @@ VectorX
   F.head(3) = Kop * wO_error + Kod * (-omega);
 
 #if ENABLE_INVERSE_DYNAMICS
-  auto qdd = mujoco.state.get_joint_accelerations();
-  auto [M, C] = legged_ctrl::crba(model, legged_ctrl::SystemConfiguration{ q, qd, qdd });
+  auto [M, C] = legged_ctrl::crba(model, legged_ctrl::SystemConfiguration{ q, qd });
   auto lambda = (J * M.inverse() * J.transpose()).completeOrthogonalDecomposition().pseudoInverse();
 
   //  TODO: fix mu term computation
   //  auto Jdqd = legged_ctrl::compute_end_effector_classical_acceleration(model,
   //    legged_ctrl::SystemConfiguration{ q, qd, qdd }, legged_ctrl::ReferenceFrame::LOCAL_WORLD_ALIGNED);
-  //  auto JTpinv = J.transpose().completeOrthogonalDecomposition().pseudoInverse();
   //  auto mu = JTpinv * C - lambda * Jdqd;
 
   F = lambda * F;
+  VectorX tau = J.transpose() * F + C;
 
-  return J.transpose() * F + C;
+#if ENABLE_POSTURE_CONTROL
+  auto JTpinv = J.transpose().completeOrthogonalDecomposition().pseudoInverse();
+  MatrixX N = eye(model.n_bodies) - J.transpose() * JTpinv;
+  VectorX desired_posture = mujoco.state.get_state_from_keyframe("home");
+  tau += N * M * (100 * (desired_posture - q) + 10 * -qd);
+#endif
+
+  return tau;
 #else
   auto g = legged_ctrl::compute_gravity_effect(model, legged_ctrl::SystemConfiguration{ q });
 
