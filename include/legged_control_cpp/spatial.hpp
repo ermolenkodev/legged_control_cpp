@@ -68,17 +68,16 @@ using IsRotationalInertia =
   std::enable_if_t<std::is_same_v<RotationalInertia, std::decay_t<RotationalInertia_>>, RotationalInertia_>;
 
 template<typename RotationalInertia_, typename Vector3_>
-SpatialMatrix I_from_rotinertia_about_com(RotationalInertia_ &&rotI_C_C, Vector3_ &&p_C_i, double mass)
+SpatialMatrix apply_steiners_theorem(RotationalInertia_ &&i_rotI_C, Vector3_ &&ipC, double mass)
 {
   static_assert(std::is_same_v<RotationalInertia, std::decay_t<RotationalInertia_>>,
     "rotational inertia must be of type RotationalInertia");
   static_assert(std::is_same_v<Vector3, std::decay_t<Vector3_>>, "vector must be of type Vector3");
 
-  SpatialMatrix I;
-  I.setZero();
-  SkewSymmetric const com_so3 = so3(p_C_i);
+  SpatialMatrix I{ SpatialMatrix::Zero() };
+  SkewSymmetric const com_so3 = so3(ipC);
   SkewSymmetric const com_so3_T = com_so3.transpose();
-  I.template topLeftCorner<3, 3>() = rotI_C_C + mass * com_so3 * com_so3_T;
+  I.template topLeftCorner<3, 3>() = i_rotI_C + mass * com_so3 * com_so3_T;
   I.template topRightCorner<3, 3>() = mass * com_so3;
   I.template bottomLeftCorner<3, 3>() = mass * com_so3_T;
   I.template bottomRightCorner<3, 3>() = mass * Matrix3::Identity();
