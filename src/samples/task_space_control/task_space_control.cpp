@@ -35,7 +35,7 @@ VectorX
   auto v = twist.tail<3>();
   auto omega = twist.head<3>();
 
-  auto [Kxp, Kxd, Kop, Kod] = gains;
+  auto [Kxp, Kxd, Kop, Kod, Kp_posture, Kd_posture] = gains;
 
   SpatialVector F;
   F.tail(3) = Kxp * (wPd - wPee) + Kxd * (-v);
@@ -55,9 +55,9 @@ VectorX
 
 #if ENABLE_POSTURE_CONTROL
   auto JTpinv = J.transpose().completeOrthogonalDecomposition().pseudoInverse();
-  MatrixX N = eye(model.n_bodies) - J.transpose() * JTpinv;
-  VectorX desired_posture = mujoco.state.get_state_from_keyframe("home");
-  tau += N * M * (100 * (desired_posture - q) + 10 * -qd);
+  MatrixX const N = eye(model.n_bodies) - J.transpose() * JTpinv;
+  VectorX const desired_posture = mujoco.state.get_state_from_keyframe("home");
+  tau += N * M * (Kp_posture * (desired_posture - q) + Kd_posture * -qd);
 #endif
 
   return tau;
@@ -80,9 +80,9 @@ void simulation_and_control_loop(Mujoco &mujoco, std::string const &scene_path, 
     mujoco.scene.get_actuator_ids({ "joint1", "joint2", "joint3", "joint4", "joint5", "joint6", "joint7" });
 
 #if ENABLE_INVERSE_DYNAMICS
-  GainMatrices const gains{ 300, 30, 100, 10 };
+  GainMatrices const gains{ 300, 30, 100, 10, 100, 10 };
 #else
-  GainMatrices const gains{ 500, 50, 10, .1 };
+  GainMatrices const gains{ 500, 50, 10, .1, 100, 10  };
 #endif
 
   while (!mujoco.gui.is_exit_requested()) {
