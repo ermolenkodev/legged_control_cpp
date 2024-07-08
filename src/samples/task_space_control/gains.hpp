@@ -14,8 +14,11 @@ struct GainMatrices
   DiagonalMatrix Kd_pos;
   DiagonalMatrix Kp_orient;
   DiagonalMatrix Kd_orient;
+  double Kp_posture;
+  double Kd_posture;
 
-  GainMatrices(double Kpp, double Kdp, double Kpo, double Kdo) : Kp_pos(3), Kd_pos(3), Kp_orient(3), Kd_orient(3)
+  GainMatrices(double Kpp, double Kdp, double Kpo, double Kdo, double Kp_posture_, double Kd_posture_)
+    : Kp_pos(3), Kd_pos(3), Kp_orient(3), Kd_orient(3), Kp_posture(Kp_posture_), Kd_posture(Kd_posture_)
   {
     Kp_pos.diagonal() = legged_ctrl::Vector3{ Kpp, Kpp, Kpp };// NOLINT
     Kd_pos.diagonal() = legged_ctrl::Vector3{ Kdp, Kdp, Kdp };// NOLINT

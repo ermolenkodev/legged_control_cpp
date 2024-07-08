@@ -42,6 +42,7 @@ KinematicsResult compute_end_effector_forward_kinematics(MultibodyModel const &m
 {
   if (!model.get_ee_transform()) { throw std::runtime_error("No end effector placement"); }
 
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
   SE3 const &nTee = model.get_ee_transform().value();
   auto const &[name, n_bodies, joints, parent, X_tree, I, _] = model;
 
