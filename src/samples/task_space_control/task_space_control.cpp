@@ -12,14 +12,14 @@ VectorX
   compute_control_torques(Mujoco const &mujoco, MultibodyModel const &model, int mocap_id, GainMatrices const &gains)
 {
   auto q = mujoco.state.get_joint_positions();
-  auto [wPee, wRee] = legged_ctrl::compute_end_effector_placement(model, q);
+  auto [wPee, wRee] = compute_end_effector_placement(model, q);
 
   auto wPd = mujoco.state.get_mocap_position(mocap_id);
 
   auto wRd = mujoco.state.get_mocap_orientation(mocap_id);
 
   auto eeRd = wRee.transpose() * wRd;
-  auto [delta_theta, r_hat] = legged_ctrl::angle_axis_from_SO3(eeRd);
+  auto [delta_theta, r_hat] = angle_axis_from_SO3(eeRd);
 
   auto eeO_error = delta_theta * r_hat;// expressed in the end-effector frame
 
@@ -28,7 +28,7 @@ VectorX
   // with the orientation aligned with the world frame
   auto wO_error = wRee * eeO_error;// expressed in the world frame
 
-  auto J = legged_ctrl::compute_end_effector_frame_jacobian(model, q, legged_ctrl::ReferenceFrame::LOCAL_WORLD_ALIGNED);
+  auto J = compute_end_effector_frame_jacobian(model, q, LOCAL_WORLD_ALIGNED);
 
   auto qd = mujoco.state.get_joint_velocities();
   auto twist = J * qd;
@@ -37,17 +37,17 @@ VectorX
 
   auto [Kxp, Kxd, Kop, Kod] = gains;
 
-  legged_ctrl::SpatialVector F;
+  SpatialVector F;
   F.tail(3) = Kxp * (wPd - wPee) + Kxd * (-v);
   F.head(3) = Kop * wO_error + Kod * (-omega);
 
 #if ENABLE_INVERSE_DYNAMICS
-  auto [M, C] = legged_ctrl::crba(model, legged_ctrl::SystemConfiguration{ q, qd });
+  auto [M, C] = crba(model, SystemConfiguration{ q, qd });
   auto lambda = (J * M.inverse() * J.transpose()).completeOrthogonalDecomposition().pseudoInverse();
 
   //  TODO: fix mu term computation
-  //  auto Jdqd = legged_ctrl::compute_end_effector_classical_acceleration(model,
-  //    legged_ctrl::SystemConfiguration{ q, qd, qdd }, legged_ctrl::ReferenceFrame::LOCAL_WORLD_ALIGNED);
+  //  auto Jdqd = compute_end_effector_classical_acceleration(model,
+  //    SystemConfiguration{ q, qd, qdd }, ReferenceFrame::LOCAL_WORLD_ALIGNED);
   //  auto mu = JTpinv * C - lambda * Jdqd;
 
   F = lambda * F;
@@ -62,7 +62,7 @@ VectorX
 
   return tau;
 #else
-  auto g = legged_ctrl::compute_gravity_effect(model, legged_ctrl::SystemConfiguration{ q });
+  auto g = compute_gravity_effect(model, SystemConfiguration{ q });
 
   return J.transpose() * F + g;
 #endif
@@ -145,7 +145,7 @@ void simulation_and_control_loop(Mujoco &mujoco, std::string const &scene_path, 
 int main()
 {
   auto mujoco = Mujoco();
-  MultibodyModel const model = legged_ctrl::mjxml::parse_mujoco_xml(std::string(ASSETS_PATH) + "/scene/iiwa14.xml");
+  MultibodyModel const model = mjxml::parse_mujoco_xml(std::string(ASSETS_PATH) + "/scene/iiwa14.xml");
 
   std::thread simulation_thread(
     &simulation_and_control_loop, std::ref(mujoco), std::string(ASSETS_PATH) + "/scene/scene.xml", model);
